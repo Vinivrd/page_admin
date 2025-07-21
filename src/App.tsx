@@ -1,4 +1,4 @@
-import './index.scss'
+// Estilos globais agora importados em main.tsx
 
 function App() {
   return <div></div>
