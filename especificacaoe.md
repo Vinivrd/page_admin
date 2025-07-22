@@ -382,7 +382,7 @@ export const validarCPF = (cpf: string): boolean => {
 
 ## 📋 Checklist de Entrega
 
-- [ ] Autenticação funcional
+- [X] Autenticação funcional
 - [ ] CRUD completo de eleitores
 - [ ] Sistema de filtros múltiplos
 - [ ] Export CSV

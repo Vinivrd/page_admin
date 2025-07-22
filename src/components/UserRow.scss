@@ -1,0 +1,61 @@
+@use '../styles/variables' as *;
+
+.user-row {
+  &:hover { background: $gray-50; }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+
+  .avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: linear-gradient(to right, $primary-color, $secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $white;
+    font-weight: 600;
+    margin-right: 0.75rem;
+  }
+
+  .details {
+    .name { font-weight: 600; color: $text-dark; }
+    .email { font-size: 0.8rem; color: $gray-500; }
+    .cpf { font-size: 0.75rem; color: $gray-400; }
+  }
+}
+
+.location, .contact, .profession {
+  display: flex;
+  flex-direction: column;
+
+  div { margin-bottom: 0.25rem; }
+}
+
+.interaction {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.yes { background: $green-100; color: $green-600; }
+  &.no { background: $red-50; color: $red-600; }
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+
+  button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: $gray-600;
+
+    &:hover { color: $gray-900; }
+  }
+} 

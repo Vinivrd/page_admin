@@ -1,0 +1,41 @@
+@use '../../styles/variables' as *;
+
+.boolean-filter {
+  &__label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: $gray-700;
+  }
+  &__buttons {
+    display: inline-flex;
+    border: 1px solid $gray-300;
+    border-radius: 0.25rem;
+    overflow: hidden;
+
+    button {
+      outline: none;
+      &:focus {
+        outline: none;
+        box-shadow: none;
+      }
+      padding: 0.5rem 0.75rem;
+      background: $white;
+      border: none;
+      font-size: 0.9rem;
+      color: $gray-700;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &.active,
+      &:hover:not(.active) {
+        background: $primary-color;
+        color: $white;
+      }
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+} 

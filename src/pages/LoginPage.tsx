@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import '../styles/login.scss';
+import { signIn } from '../services/auth.service';
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -66,18 +69,15 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      // Simular chamada de API com um timeout
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulação de sucesso
-      alert('Login realizado com sucesso!');
-      
-      // Aqui você pode redirecionar o usuário para a página principal
-      // navigate('/dashboard');
-    } catch (error) {
-      // Tratamento de erro
-      alert('Erro ao fazer login. Tente novamente.');
-      console.error('Erro de login:', error);
+      const { data, error } = await signIn(formData.email, formData.password);
+      if (error) {
+        setErrors(prev => ({ ...prev, general: "Credencial invalida" }));
+        return;
+      }
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Erro de login:', err);
+      setErrors(prev => ({ ...prev, general: 'Erro ao fazer login. Tente novamente.' }));
     } finally {
       setIsLoading(false);
     }
@@ -145,6 +145,9 @@ export default function LoginPage() {
               </div>
               {errors.password && (
                 <p className="login-form__error">{errors.password}</p>
+              )}
+              {errors.general && (
+                <p className="login-form__error">{errors.general}</p>
               )}
             </div>
 

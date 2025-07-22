@@ -1,0 +1,37 @@
+@use '../../styles/variables' as *;
+
+.search-filter {
+  &__label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: $gray-700;
+  }
+  &__wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid $gray-300;
+    border-radius: 0.25rem;
+    background: $white;
+
+    .search-filter__icon {
+      position: absolute;
+      left: 0.75rem;
+      color: $gray-400;
+    }
+    .search-filter__input {
+      flex: 1;
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      border: none;
+      font-size: 0.9rem;
+      background: transparent;
+      color: $text-dark;
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px $primary-color;
+      }
+    }
+  }
+} 
