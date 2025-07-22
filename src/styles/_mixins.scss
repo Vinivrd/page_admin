@@ -1,5 +1,35 @@
+@use './variables' as *;
+
 @mixin flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@mixin gradient-bg($from, $to) {
+  background: linear-gradient(to right, $from, $to);
+}
+
+@mixin input-focus {
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($blue-500, 0.3);
+    border-color: $blue-500;
+  }
+}
+
+@mixin transition {
+  transition: all 0.2s ease-in-out;
+}
+
+@mixin button-hover {
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 } 

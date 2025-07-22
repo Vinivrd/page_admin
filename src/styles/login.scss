@@ -1,0 +1,217 @@
+@use './variables' as *;
+@use './mixins' as *;
+
+.login-page {
+  min-height: 100vh;
+  ///background: linear-gradient(to bottom right, $blue-50, $white, $purple-50);
+  @include flex-center;
+  padding: 2rem;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 56rem; // Mantendo a largura aumentada
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; // Garantir que os filhos ocupem toda a largura
+}
+
+.login-card {
+  background-color: $white;
+  border-radius: 1.5rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border: 1px solid $gray-100;
+  overflow: hidden;
+  width: 100%; // Garantir que ocupe toda a largura
+}
+
+.login-header {
+  @include gradient-bg($blue-600, $purple-600);
+  padding: 2rem 2.5rem;
+  text-align: center;
+  width: 100%; // Garantir que ocupe toda a largura
+  box-sizing: border-box; // Garantir que o padding não aumente a largura
+  
+  &__icon {
+    width: 5rem;
+    height: 5rem;
+    background-color: $white;
+    border-radius: 50%;
+    @include flex-center;
+    margin: 0 auto 1.5rem;
+    
+    svg {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: $blue-600;
+    }
+  }
+  
+  &__title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: $white;
+    margin-bottom: 0.75rem;
+  }
+  
+  &__subtitle {
+    color: $blue-100;
+    font-size: 1rem;
+  }
+}
+
+.login-form {
+  padding: 2.5rem;
+  width: 100%; // Garantir que ocupe toda a largura
+  box-sizing: border-box; // Garantir que o padding não aumente a largura
+  
+  &__group {
+    margin-bottom: 2rem;
+    width: 100%; // Garantir que ocupe toda a largura
+    
+    label {
+      display: block;
+      font-size: 1rem;
+      font-weight: 500;
+      color: $gray-700;
+      margin-bottom: 0.75rem;
+      width: 100%; // Garantir que ocupe toda a largura
+    }
+  }
+  
+  &__input-wrapper {
+    position: relative;
+    width: 100%; // Ocupa toda a largura do formulário
+    display: block;
+    margin: 0; // Sem margin para ocupar full width
+    
+    .icon-left {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $gray-400;
+      pointer-events: none;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    
+    .icon-right {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $gray-400;
+      cursor: pointer;
+      width: 1.25rem;
+      height: 1.25rem;
+      background: transparent;
+      border: none;
+      padding: 0;
+      
+      &:hover {
+        color: $gray-600;
+      }
+    }
+  }
+  
+  &__input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1rem 3rem 1rem 3rem;
+    border: 1px solid $gray-300;
+    border-radius: 0.75rem;
+    font-size: 1.125rem;
+    background-color: $white;
+    color: $gray-700;
+    @include transition;
+    @include input-focus;
+    display: block;
+
+    &::placeholder {
+      color: $gray-400;
+    }
+
+    &:focus,
+    &:hover {
+      background-color: $white;
+      color: $gray-700;
+    }
+
+    &:-webkit-autofill {
+      box-shadow: 0 0 0px 1000px $white inset;
+      -webkit-text-fill-color: $gray-700 !important;
+    }
+
+    &--error {
+      border-color: $red-300;
+      background-color: $red-50;
+    }
+  }
+  
+  &__error {
+    color: $red-600;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+  
+  &__button {
+    width: 100%; // Ocupa toda a largura do formulário
+    margin: 1rem 0 0 0; // Espaçamento acima e sem centralização manual
+    @include gradient-bg($blue-600, $purple-600);
+    color: $white;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.125rem;
+    cursor: pointer;
+    @include transition;
+    @include button-hover;
+    display: block; // Garantir que ocupe toda a largura
+    
+    &:hover {
+      @include gradient-bg($blue-700, $purple-700);
+    }
+    
+    &__spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 0.2rem solid $white;
+      border-top-color: transparent;
+      border-radius: 50%;
+      margin-right: 0.75rem;
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+.login-footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 1rem;
+  color: $gray-500;
+  width: 100%; // Garantir que ocupe toda a largura
+}
+
+// Media queries para responsividade
+@media (min-width: 768px) {
+  .login-container {
+    max-width: 42rem;
+  }
+  
+  .login-form {
+    padding: 3rem;
+  }
+  
+  .login-header {
+    padding: 2.5rem 3rem;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 
