@@ -2,14 +2,14 @@
 
 .boolean-filter {
   &__label {
-    display: block;
-    margin-bottom: 0.25rem;
+    display: inline-block;
+    margin: 0 0.5rem 0 0;
     font-size: 0.9rem;
     color: $gray-700;
+    align-self: center;
   }
   &__buttons {
     display: inline-flex;
-    border: 1px solid $gray-300;
     border-radius: 0.25rem;
     overflow: hidden;
 
