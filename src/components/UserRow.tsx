@@ -9,13 +9,18 @@ interface User {
   cpf?: string;
   regiao: string;
   cidade: string;
+  genero: string;
   bairro?: string;
   telefone?: string;
   instagram?: string;
+  tiktok?: string;
+  religiao?: string;
+  observacoes?: string;
   profissao?: string;
   escola?: string;
   interacao: boolean;
   created_at: string;
+  data_nascimento: string;
 }
 
 interface UserRowProps {
@@ -37,6 +42,7 @@ const UserRow: FC<UserRowProps> = ({ user }) => {
             <div className="name">{user.nome}</div>
             <div className="email">{user.email}</div>
             <div className="cpf">CPF: {user.cpf}</div>
+            <div className="birthday">Nascimento: {user.data_nascimento}</div>
           </div>
         </div>
       </td>
@@ -47,10 +53,27 @@ const UserRow: FC<UserRowProps> = ({ user }) => {
           <div className="neighborhood">{user.bairro}</div>
         </div>
       </td>
-      <td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="gender">{user.genero}</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="religion">{user.religiao || '-'}</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
         <div className="contact">
           <div className="phone">{formatPhone(user.telefone)}</div>
-          <div className="social">{user.instagram || '-'}</div>
+        </div>
+      </td>
+      <td className="px-6 py-4">
+        <div className="social">
+          {(user.instagram || user.tiktok) ? (
+            <>
+              {user.instagram && <span className="social__item">{user.instagram}</span>}
+              {user.tiktok && <span className="social__item">{user.tiktok}</span>}
+            </>
+          ) : (
+            <span className="social__item">-</span>
+          )}
         </div>
       </td>
       <td>
@@ -58,6 +81,9 @@ const UserRow: FC<UserRowProps> = ({ user }) => {
           <div className="job">{user.profissao || '-'}</div>
           <div className="school">{user.escola || '-'}</div>
         </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="observations">{user.observacoes || '-'}</div>
       </td>
       <td>
         <span className={`interaction ${user.interacao ? 'yes' : 'no'}`}>{user.interacao ? 'Sim' : 'Não'}</span>

@@ -125,13 +125,15 @@
   .dashboard__table {
     background: $white;
     border-radius: 0.5rem;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 
     .table__header { padding: 1rem; }
 
     .table__body {
       table {
+        table-layout: fixed;
         width: 100%;
         border-collapse: collapse;
 
@@ -140,6 +142,9 @@
           text-align: left;
           border-bottom: 1px solid $gray-100;
           font-size: 0.9rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         thead {
@@ -147,6 +152,19 @@
           text-transform: uppercase;
           font-weight: 600;
         }
+
+        // larguras aproximadas para 11 colunas
+        th:nth-child(1), td:nth-child(1) { width: 12%; } /* Usuário */
+        th:nth-child(2), td:nth-child(2) { width: 12%; } /* Região/Cidade */
+        th:nth-child(3), td:nth-child(3) { width: 8%; }  /* Gênero */
+        th:nth-child(4), td:nth-child(4) { width: 8%; }  /* Religião */
+        th:nth-child(5), td:nth-child(5) { width: 8%; }  /* Contato */
+        th:nth-child(6), td:nth-child(6) { width: 8%; }  /* Redes Sociais */
+        th:nth-child(7), td:nth-child(7) { width: 8%; }  /* Profissão */
+        th:nth-child(8), td:nth-child(8) { width: 12%; } /* Observações */
+        th:nth-child(9), td:nth-child(9) { width: 6%; }  /* Interação */
+        th:nth-child(10), td:nth-child(10) { width: 6%; }  /* Data Cadastro */
+        th:nth-child(11), td:nth-child(11) { width: 6%; }  /* Ações */
       }
     }
 

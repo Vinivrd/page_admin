@@ -181,10 +181,16 @@ const DashboardPage = () => {
           <table>
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Cidade</th>
+                <th>Usuário</th>
+                <th>Região/Cidade</th>
                 <th>Gênero</th>
+                <th>Religião</th>
+                <th>Contato</th>
+                <th>Redes Sociais</th>
+                <th>Prof/Escola</th>
+                <th>Observações</th>
                 <th>Interação</th>
+                <th>Cadastro</th>
                 <th>Ações</th>
               </tr>
             </thead>

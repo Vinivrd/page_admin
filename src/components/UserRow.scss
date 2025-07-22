@@ -35,6 +35,24 @@
   div { margin-bottom: 0.25rem; }
 }
 
+.gender,
+.religion,
+.observations {
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+  color: $text-dark;
+}
+
+.social {
+  display: flex;
+  flex-direction: column;
+  .social__item {
+    font-size: 0.8rem;
+    color: $gray-700;
+    margin-bottom: 0.25rem;
+  }
+}
+
 .interaction {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -48,6 +66,7 @@
 
 .actions {
   display: flex;
+  justify-content: center;
   gap: 0.5rem;
 
   button {
