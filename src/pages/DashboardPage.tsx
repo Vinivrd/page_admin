@@ -180,30 +180,106 @@ const DashboardPage = () => {
        
         </div>
         <div className="filters__actions">
-          <div>
-            <button type="button" className="adicionar" onClick={() => setIsAddModalOpen(true)}>
-              <span className='plus-adicionar'>+</span> Adicionar
-            </button> 
+          <div className="filters__actions-primary">
+            <button 
+              type="button" 
+              className="btn-primary" 
+              onClick={() => setIsAddModalOpen(true)}
+              aria-label="Adicionar novo eleitor"
+            >
+              <span className="btn-icon">+</span>
+              <span>Adicionar</span>
+            </button>
           </div>
-          <button type="button" onClick={clearFilters}>Limpar filtros</button>
-          <button type="button" className="export">
-            <Download size={16} /> Exportar
-          </button>
+          <div className="filters__actions-secondary">
+            <button 
+              type="button" 
+              className="btn-secondary" 
+              onClick={clearFilters}
+              aria-label="Limpar todos os filtros"
+            >
+              Limpar filtros
+            </button>
+            <button 
+              type="button" 
+              className="btn-secondary btn-with-icon" 
+              aria-label="Exportar dados"
+            >
+              <Download size={16} />
+              <span>Exportar</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="dashboard__stats">
         <div className="stat-card">
-          <div className="value">{filteredEleitores.length}</div>
-          <div className="label">Total de eleitores</div>
+          <div className="stat-card__icon total-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div className="stat-card__content">
+            <div className="stat-card__value">{filteredEleitores.length}</div>
+            <div className="stat-card__label">Total de eleitores</div>
+          </div>
         </div>
+
         <div className="stat-card">
-          <div className="value">{filteredEleitores.filter(e => e.interacao).length}</div>
-          <div className="label">Com interação</div>
+          <div className="stat-card__icon interaction-yes-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+            </svg>
+          </div>
+          <div className="stat-card__content">
+            <div className="stat-card__value">{filteredEleitores.filter(e => e.interacao).length}</div>
+            <div className="stat-card__label">Com interação</div>
+          </div>
+          <div className="stat-card__percentage">
+            {filteredEleitores.length > 0 ? 
+              `${Math.round((filteredEleitores.filter(e => e.interacao).length / filteredEleitores.length) * 100)}%` : 
+              '0%'
+            }
+          </div>
         </div>
+
         <div className="stat-card">
-          <div className="value">{filteredEleitores.filter(e => !e.interacao).length}</div>
-          <div className="label">Sem interação</div>
+          <div className="stat-card__icon interaction-no-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+            </svg>
+          </div>
+          <div className="stat-card__content">
+            <div className="stat-card__value">{filteredEleitores.filter(e => !e.interacao).length}</div>
+            <div className="stat-card__label">Sem interação</div>
+          </div>
+          <div className="stat-card__percentage">
+            {filteredEleitores.length > 0 ? 
+              `${Math.round((filteredEleitores.filter(e => !e.interacao).length / filteredEleitores.length) * 100)}%` : 
+              '0%'
+            }
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card__icon recent-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div className="stat-card__content">
+            <div className="stat-card__value">
+              {filteredEleitores.length > 0 ? 
+                new Date(Math.max(...filteredEleitores.map(e => new Date(e.created_at || '').getTime()))).toLocaleDateString('pt-BR') : 
+                '-'
+              }
+            </div>
+            <div className="stat-card__label">Último cadastro</div>
+          </div>
         </div>
       </div>
 
