@@ -1,7 +1,8 @@
 import type { FC } from 'react';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import './UserRow.scss';
+import AddUserModal from './add-user/AddUserModal';
 
 // Movendo a interface User para um arquivo separado (simulado aqui)
 export interface User {
@@ -46,55 +47,80 @@ const formatNullableField = (value?: string): string => value || '-';
 
 // Componente principal com memo para evitar renderizações desnecessárias
 const UserRow: FC<UserRowProps> = memo(({ user }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleEditClick = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+  };
+
   return (
-    <tr className="user-row">
-      <td className="user-row__cell">
-        <UserInfo user={user} />
-      </td>
-      <td className="user-row__cell">
-        <Location user={user} />
-      </td>
-      <td className="user-row__cell">
-        <div className="user-row__gender">{user.genero}</div>
-      </td>
-      <td className="user-row__cell">
-        <div className="user-row__religion">{formatNullableField(user.religiao)}</div>
-      </td>
-      <td className="user-row__cell">
-        <div className="user-row__contact">
-          <div className="user-row__phone">{formatNullableField(user.telefone)}</div>
-        </div>
-      </td>
-      <td className="user-row__cell">
-        <SocialMedia instagram={user.instagram} tiktok={user.tiktok} />
-      </td>
-      <td className="user-row__cell">
-        <Profession profissao={user.profissao} escola={user.escola} />
-      </td>
-      <td className="user-row__cell">
-        <div className="user-row__observations">{formatNullableField(user.observacoes)}</div>
-      </td>
-      <td className="user-row__cell">
-        <span className={`user-row__interaction ${user.interacao ? 'user-row__interaction--yes' : 'user-row__interaction--no'}`}>
-          {user.interacao ? 'Sim' : 'Não'}
-        </span>
-      </td>
-      <td className="user-row__cell">{formatDate(user.created_at)}</td>
-      <td className="user-row__cell">
-        <div className="user-row__actions">
-          <button type="button" className="user-row__action-button">
-            <span className="user-row__icon-wrapper">
-              <Edit size={16} />
-            </span>
-          </button>
-          <button type="button" className="user-row__action-button">
-            <span className="user-row__icon-wrapper">
-              <Trash2 size={16} />
-            </span>
-          </button>
-        </div>
-      </td>
-    </tr>
+    <>
+      <tr className="user-row">
+        <td className="user-row__cell">
+          <UserInfo user={user} />
+        </td>
+        <td className="user-row__cell">
+          <Location user={user} />
+        </td>
+        <td className="user-row__cell">
+          <div className="user-row__gender">{user.genero}</div>
+        </td>
+        <td className="user-row__cell">
+          <div className="user-row__religion">{formatNullableField(user.religiao)}</div>
+        </td>
+        <td className="user-row__cell">
+          <div className="user-row__contact">
+            <div className="user-row__phone">{formatNullableField(user.telefone)}</div>
+          </div>
+        </td>
+        <td className="user-row__cell">
+          <SocialMedia instagram={user.instagram} tiktok={user.tiktok} />
+        </td>
+        <td className="user-row__cell">
+          <Profession profissao={user.profissao} escola={user.escola} />
+        </td>
+        <td className="user-row__cell">
+          <div className="user-row__observations">{formatNullableField(user.observacoes)}</div>
+        </td>
+        <td className="user-row__cell">
+          <span className={`user-row__interaction ${user.interacao ? 'user-row__interaction--yes' : 'user-row__interaction--no'}`}>
+            {user.interacao ? 'Sim' : 'Não'}
+          </span>
+        </td>
+        <td className="user-row__cell">{formatDate(user.created_at)}</td>
+        <td className="user-row__cell">
+          <div className="user-row__actions">
+            <button 
+              type="button" 
+              className="user-row__action-button"
+              onClick={handleEditClick}
+            >
+              <span className="user-row__icon-wrapper">
+                <Edit size={16} />
+              </span>
+            </button>
+            <button type="button" className="user-row__action-button">
+              <span className="user-row__icon-wrapper">
+                <Trash2 size={16} />
+              </span>
+            </button>
+          </div>
+        </td>
+      </tr>
+
+      {isEditModalOpen && (
+        <AddUserModal
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          userToEdit={user}
+          isEditing={true}
+        />
+      )}
+    </>
   );
 });
 

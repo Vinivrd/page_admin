@@ -1,16 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import './AddUserModal.scss';
-import { addEleitor } from '../../services/eleitores.service';
+import { addEleitor, updateEleitor } from '../../services/eleitores.service';
+import type { Eleitor } from '../../services/eleitores.service';
 import ErrorMessage from '../ErrorMessage';
 import { EleitoresError } from '../../services/eleitores.service';
 
 interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
+  userToEdit?: Eleitor | null;
+  isEditing?: boolean;
 }
 
-const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
+const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUserModalProps) => {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -34,6 +37,32 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<{message: string, details?: string} | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Preencher o formulário quando estiver editando um usuário
+  useEffect(() => {
+    if (isEditing && userToEdit) {
+      setFormData({
+        nome: userToEdit.nome || '',
+        email: userToEdit.email || '',
+        regiao: userToEdit.regiao || '',
+        cidade: userToEdit.cidade || '',
+        bairro: userToEdit.bairro || '',
+        cep: userToEdit.cep || '',
+        genero: userToEdit.genero || '',
+        religiao: userToEdit.religiao || '',
+        escola: userToEdit.escola || '',
+        profissao: userToEdit.profissao || '',
+        telefone: userToEdit.telefone || '',
+        data_nascimento: userToEdit.data_nascimento || '',
+        cpf: userToEdit.cpf || '',
+        instagram: userToEdit.instagram || '',
+        facebook: userToEdit.facebook || '',
+        tiktok: userToEdit.tiktok || '',
+        observacoes: userToEdit.observacoes || '',
+        interacao: userToEdit.interacao || false,
+      });
+    }
+  }, [isEditing, userToEdit]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -76,14 +105,21 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
     setError(null);
     
     try {
-      const { data, error } = await addEleitor(formData);
+      let result;
       
-      if (error) {
-        throw error;
+      if (isEditing && userToEdit?.id) {
+        // Atualizar eleitor existente
+        result = await updateEleitor(userToEdit.id, formData);
+        if (result.error) throw result.error;
+        setSuccessMessage('Eleitor atualizado com sucesso!');
+        console.log('Eleitor atualizado com sucesso:', result.data);
+      } else {
+        // Adicionar novo eleitor
+        result = await addEleitor(formData);
+        if (result.error) throw result.error;
+        setSuccessMessage('Eleitor cadastrado com sucesso!');
+        console.log('Eleitor cadastrado com sucesso:', result.data);
       }
-      
-      setSuccessMessage('Eleitor cadastrado com sucesso!');
-      console.log('Eleitor cadastrado com sucesso:', data);
       
       // Resetar o formulário após o sucesso
       resetForm();
@@ -93,18 +129,18 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
         onClose();
       }, 1500);
     } catch (err) {
-      console.error('Erro ao adicionar eleitor:', err);
+      console.error(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor:`, err);
       
       if (err instanceof EleitoresError) {
         // Mensagens de erro mais amigáveis baseadas no código
-        let errorMessage = 'Erro ao adicionar eleitor';
+        let errorMessage = `Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor`;
         
         switch(err.code) {
           case 'database/duplicate-entry':
             errorMessage = 'Este eleitor já existe no sistema';
             break;
           case 'database/permission-denied':
-            errorMessage = 'Você não tem permissão para adicionar eleitores';
+            errorMessage = `Você não tem permissão para ${isEditing ? 'atualizar' : 'adicionar'} eleitores`;
             break;
           case 'database/timeout':
             errorMessage = 'Tempo esgotado. Verifique sua conexão';
@@ -117,7 +153,7 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
         });
       } else {
         setError({
-          message: 'Erro ao adicionar eleitor. Tente novamente.',
+          message: `Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor. Tente novamente.`,
           details: err instanceof Error ? err.message : 'Erro desconhecido'
         });
       }
@@ -162,7 +198,7 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
-          <h2>Adicionar Eleitor</h2>
+          <h2>{isEditing ? 'Editar Eleitor' : 'Adicionar Eleitor'}</h2>
           <button className="close-button" onClick={handleClose}>
             <X size={20} />
           </button>
@@ -413,7 +449,7 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
               className="submit-button" 
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Salvando...' : 'Salvar'}
+              {isSubmitting ? 'Salvando...' : isEditing ? 'Atualizar' : 'Salvar'}
             </button>
           </div>
         </form>
