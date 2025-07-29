@@ -34,7 +34,7 @@ interface Eleitor {
 
 const DashboardPage = () => {
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
-  const [filters, setFilters] = useState({ regiao: '', interacao: '', genero: '', cidade: '', search: '' });
+  const [filters, setFilters] = useState({ regiao: '', interacao: '', genero: '', cidade: '', search: '', religiao: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [error, setError] = useState<string | null>(null);
@@ -57,12 +57,13 @@ const DashboardPage = () => {
       const matchesInteracao = filters.interacao === '' || e.interacao.toString() === filters.interacao;
       const matchesGenero = !filters.genero || e.genero === filters.genero;
       const matchesCidade = !filters.cidade || e.cidade.toLowerCase().includes(filters.cidade.toLowerCase());
+      const matchesReligiao = !filters.religiao || e.religiao === filters.religiao;
       const matchesSearch =
         !filters.search ||
         e.nome.toLowerCase().includes(filters.search.toLowerCase()) ||
         (e.email?.toLowerCase().includes(filters.search.toLowerCase())) ||
         (e.cpf?.includes(filters.search));
-      return matchesRegiao && matchesInteracao && matchesGenero && matchesCidade && matchesSearch;
+      return matchesRegiao && matchesInteracao && matchesGenero && matchesCidade && matchesReligiao && matchesSearch;
     });
   }, [eleitores, filters]);
 
@@ -76,8 +77,8 @@ const DashboardPage = () => {
   };
 
   const clearFilters = () => {
-    setFilters({ regiao: '', interacao: '', genero: '', cidade: '', search: '' });
-    setCurrentPage(1);
+    setFilters({ regiao: '', interacao: '', genero: '', cidade: '', search: '', religiao: '' });
+    setCurrentPage(1);  
   };
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
@@ -97,59 +98,75 @@ const DashboardPage = () => {
           <span>Filtros</span>
         </div>
         <div className="filters__controls">
-          <div className="filter-group">
-            <SearchFilter
-              label="Buscar"
-              placeholder="Nome, email ou CPF"
-              value={filters.search}
-              onChange={val => handleFilterChange('search', val)}
+   
+          <SearchFilter
+            label="Buscar"
+            placeholder="Nome, email ou CPF"
+            value={filters.search}
+            onChange={val => handleFilterChange('search', val)}
+          />
+                 
+          <ListFilter
+            label="Região"
+            options={[
+              { value: '', label: 'Todas as regiões' },
+              { value: 'Norte', label: 'Norte' },
+              { value: 'Sul', label: 'Sul' },
+              { value: 'Leste', label: 'Leste' },
+              { value: 'Oeste', label: 'Oeste' },
+              { value: 'Centro', label: 'Centro' },
+            ]}
+            value={filters.regiao}
+            onChange={val => handleFilterChange('regiao', val)}
+          />
+         
+          <SearchFilter
+            label="Cidade"
+            placeholder="Digite a cidade"
+            value={filters.cidade}
+            onChange={val => handleFilterChange('cidade', val)}
+          />
+         
+          <ListFilter
+            label="Gênero"
+            options={[
+              { value: '', label: 'Todos' },
+              { value: 'MASCULINO', label: 'Masculino' },
+              { value: 'FEMININO', label: 'Feminino' },
+              { value: 'OUTROS', label: 'Outros' },
+            ]}
+            value={filters.genero}
+            onChange={val => handleFilterChange('genero', val)}
+          />
+
+          <ListFilter
+            label="Religião"
+            options={[
+              { value: '', label: 'Todas as religiões' },
+              { value: 'Cristianismo', label: 'Cristianismo' },
+              { value: 'Islamismo', label: 'Islamismo' },
+              { value: 'Budismo', label: 'Budismo' },
+              { value: 'Hinduismo', label: 'Hinduismo' },
+              { value: 'Judaísmo', label: 'Judaísmo' },
+              { value: 'Outros', label: 'Outros' },
+            ]}
+            value={filters.religiao}
+            onChange={val => handleFilterChange('religiao', val)}
             />
-          </div>
-          <div className="filter-group">
-            <ListFilter
-              label="Região"
-              options={[
-                { value: '', label: 'Todas as regiões' },
-                { value: 'Norte', label: 'Norte' },
-                { value: 'Sul', label: 'Sul' },
-                { value: 'Leste', label: 'Leste' },
-                { value: 'Oeste', label: 'Oeste' },
-                { value: 'Centro', label: 'Centro' },
-              ]}
-              value={filters.regiao}
-              onChange={val => handleFilterChange('regiao', val)}
-            />
-          </div>
-          <div className="filter-group">
-            <SearchFilter
-              label="Cidade"
-              placeholder="Digite a cidade"
-              value={filters.cidade}
-              onChange={val => handleFilterChange('cidade', val)}
-            />
-          </div>
-          <div className="filter-group">
-            <ListFilter
-              label="Gênero"
-              options={[
-                { value: '', label: 'Todos' },
-                { value: 'MASCULINO', label: 'Masculino' },
-                { value: 'FEMININO', label: 'Feminino' },
-                { value: 'OUTROS', label: 'Outros' },
-              ]}
-              value={filters.genero}
-              onChange={val => handleFilterChange('genero', val)}
-            />
-          </div>
-          <div className="filter-group">
-            <BooleanFilter
-              label="Interação"
-              value={filters.interacao}
-              onChange={val => handleFilterChange('interacao', val)}
-            />
-          </div>
+        
+          <BooleanFilter
+            label="Interação"
+            value={filters.interacao}
+            onChange={val => handleFilterChange('interacao', val)}
+          />
+
+
+       
         </div>
         <div className="filters__actions">
+          <div>
+            <button type="button" className="adicionar"><span  className='plus-adicionar'>+</span> Adicionar</button> 
+          </div>
           <button type="button" onClick={clearFilters}>Limpar filtros</button>
           <button type="button" className="export">
             <Download size={16} /> Exportar
