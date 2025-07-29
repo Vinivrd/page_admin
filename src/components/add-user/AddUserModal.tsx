@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import './AddUserModal.scss';
 import { addEleitor, updateEleitor } from '../../services/eleitores.service';
 import type { Eleitor } from '../../services/eleitores.service';
 import ErrorMessage from '../ErrorMessage';
 import { EleitoresError } from '../../services/eleitores.service';
+import { toast } from 'react-toastify';
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -37,6 +38,8 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<{message: string, details?: string} | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
 
   // Preencher o formulário quando estiver editando um usuário
   useEffect(() => {
@@ -63,6 +66,15 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
       });
     }
   }, [isEditing, userToEdit]);
+
+  // Limpar timeout quando o componente for desmontado
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -111,13 +123,33 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
         // Atualizar eleitor existente
         result = await updateEleitor(userToEdit.id, formData);
         if (result.error) throw result.error;
+        
         setSuccessMessage('Eleitor atualizado com sucesso!');
+        toast.success('Eleitor atualizado com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
         console.log('Eleitor atualizado com sucesso:', result.data);
       } else {
         // Adicionar novo eleitor
         result = await addEleitor(formData);
         if (result.error) throw result.error;
+        
         setSuccessMessage('Eleitor cadastrado com sucesso!');
+        toast.success('Eleitor cadastrado com sucesso!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
         console.log('Eleitor cadastrado com sucesso:', result.data);
       }
       
@@ -126,7 +158,7 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
       
       // Fechar o modal após um pequeno delay para mostrar a mensagem de sucesso
       setTimeout(() => {
-        onClose();
+        handleCloseWithAnimation();
       }, 1500);
     } catch (err) {
       console.error(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor:`, err);
@@ -151,10 +183,29 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
           message: errorMessage,
           details: err.message
         });
+        
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       } else {
+        const errorMsg = `Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor. Tente novamente.`;
         setError({
-          message: `Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor. Tente novamente.`,
+          message: errorMsg,
           details: err instanceof Error ? err.message : 'Erro desconhecido'
+        });
+        
+        toast.error(errorMsg, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
         });
       }
     } finally {
@@ -187,19 +238,24 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
     setSuccessMessage(null);
   };
 
-  const handleClose = () => {
-    resetForm();
-    onClose();
+  const handleCloseWithAnimation = () => {
+    setIsClosing(true);
+    // Aguardar a animação terminar antes de fechar o modal
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setIsClosing(false);
+      resetForm();
+      onClose();
+    }, 300); // Tempo da animação em ms
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container">
+    <div className={`modal-overlay ${isClosing ? 'closing' : ''}`}>
+      <div className={`modal-container ${isClosing ? 'closing' : ''}`}>
         <div className="modal-header">
           <h2>{isEditing ? 'Editar Eleitor' : 'Adicionar Eleitor'}</h2>
-          <button className="close-button" onClick={handleClose}>
+          <button className="close-button" onClick={handleCloseWithAnimation}>
             <X size={20} />
           </button>
         </div>
@@ -441,7 +497,7 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
           </div>
           
           <div className="form-actions">
-            <button type="button" className="cancel-button" onClick={handleClose}>
+            <button type="button" className="cancel-button" onClick={handleCloseWithAnimation}>
               Cancelar
             </button>
             <button 

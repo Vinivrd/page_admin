@@ -56,6 +56,42 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+// Estilos personalizados para os toasts
+.Toastify__toast {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: $font-stack;
+  font-size: 0.95rem;
+}
+
+.Toastify__toast--success {
+  background-color: #e6f9e6;
+  color: darken($green-600, 15%);
+  border-left: 4px solid $green-600;
+}
+
+.Toastify__toast--error {
+  background-color: #f9e6e6;
+  color: darken(#f44336, 15%);
+  border-left: 4px solid #f44336;
+}
+
+.Toastify__toast--info {
+  background-color: #e6f2ff;
+  color: darken($primary-color, 15%);
+  border-left: 4px solid $primary-color;
+}
+
+.Toastify__toast--warning {
+  background-color: #fff8e6;
+  color: darken(#ff9800, 15%);
+  border-left: 4px solid #ff9800;
+}
+
+.Toastify__progress-bar {
+  height: 3px;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: $text-dark;

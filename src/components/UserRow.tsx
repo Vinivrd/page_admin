@@ -3,6 +3,7 @@ import { memo, useState } from 'react';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import './UserRow.scss';
 import AddUserModal from './add-user/AddUserModal';
+import { toast } from 'react-toastify';
 
 // Movendo a interface User para um arquivo separado (simulado aqui)
 export interface User {
@@ -51,6 +52,14 @@ const UserRow: FC<UserRowProps> = memo(({ user }) => {
 
   const handleEditClick = () => {
     setIsEditModalOpen(true);
+    toast.info(`Editando eleitor: ${user.nome}`, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
   };
 
   const handleCloseEditModal = () => {

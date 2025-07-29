@@ -10,6 +10,7 @@ import ErrorMessage from '../components/ErrorMessage';
 import './DashboardPage.scss';
 import { fetchEleitores } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
+import { toast } from 'react-toastify';
 
 const DashboardPage = () => {
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
@@ -88,11 +89,14 @@ const DashboardPage = () => {
         const { data, error } = await fetchEleitores();
         if (error) {
           setError('Erro ao buscar eleitores: ' + error.message);
+          toast.error('Erro ao atualizar lista de eleitores');
           return;
         }
         setEleitores(data || []);
+        toast.success('Lista de eleitores atualizada com sucesso!');
       } catch (err) {
         setError('Erro ao buscar eleitores: ' + (err instanceof Error ? err.message : String(err)));
+        toast.error('Erro ao atualizar lista de eleitores');
       }
     };
     getEleitores();

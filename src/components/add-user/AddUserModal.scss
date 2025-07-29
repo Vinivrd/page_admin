@@ -1,5 +1,45 @@
 @use '../../styles/variables' as *;
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -12,6 +52,11 @@
   align-items: center;
   z-index: 1000;
   overflow: hidden;
+  animation: fadeIn 0.3s ease forwards;
+  
+  &.closing {
+    animation: fadeOut 0.3s ease forwards;
+  }
 }
 
 .modal-container {
@@ -23,6 +68,11 @@
   max-height: 90vh;
   overflow-y: auto;
   padding: 1.5rem;
+  animation: slideIn 0.4s ease-out forwards;
+  
+  &.closing {
+    animation: slideOut 0.3s ease-in forwards;
+  }
   
   /* Esconder a barra de rolagem mas manter a funcionalidade */
   scrollbar-width: none; /* Firefox */
