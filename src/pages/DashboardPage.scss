@@ -15,25 +15,40 @@
 
   &__filters {
     background: $white;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
 
     .filters__header {
       display: flex;
       align-items: center;
-      margin-bottom: 1rem;
-
-      svg  { margin-right: 0.5rem; }
-      span { font-weight: 600; }
+      margin-bottom: 1.25rem;
+      
+      svg {
+        color: $gray-600;
+        margin-right: 0.5rem;
+      }
+      
+      span {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $gray-800;
+      }
     }
 
     .filters__controls {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1rem;
-
+      margin-bottom: 1.25rem;
+      
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+      
       .filter-group {
+        width: 100%;
         display: flex;
         flex-direction: column;
 
@@ -67,38 +82,51 @@
         }
       }
     }
+
     .filters__actions {
       display: flex;
       justify-content: flex-end;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
-
+      gap: 0.75rem;
+      border-top: 1px solid $gray-200;
+      padding-top: 1.25rem;
+      margin-top: 0.5rem;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+      
       button {
-        padding: 0.5rem 1rem;
+        padding: 0.65rem 1rem;
+        border-radius: 0.5rem;
         font-size: 0.9rem;
-        border: 1px solid $gray-300;
-        border-radius: 0.25rem;
-        background: transparent;
-        color: $gray-700;
-        transition: background 0.2s, color 0.2s;
-
-        &:hover {
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &:first-child {
           background: $gray-100;
-        }
-
-        &.export {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem 1rem;
-          border: 1px solid $green-600;
-          background: $green-600;
-          color: $white;
-          svg { margin: 0; }
+          color: $gray-700;
+          border: 1px solid $gray-300;
+          
           &:hover {
-            background: $secondary-color;
-            border-color: $secondary-color;
+            background: $gray-200;
+          }
+        }
+        
+        &.export {
+          background: $primary-color;
+          color: white;
+          border: none;
+          
+          svg {
+            margin-right: 0.5rem;
+          }
+          
+          &:hover {
+            background: darken($primary-color, 5%);
           }
         }
       }

@@ -93,18 +93,18 @@ const DashboardPage = () => {
 
       <div className="dashboard__filters">
         <div className="filters__header">
-          <Filter />
+          <Filter size={18} />
           <span>Filtros</span>
         </div>
         <div className="filters__controls">
           <div className="filter-group">
-              <BooleanFilter
-                label="Interação"
-                value={filters.interacao}
-                onChange={val => handleFilterChange('interacao', val)}
-              />
+            <SearchFilter
+              label="Buscar"
+              placeholder="Nome, email ou CPF"
+              value={filters.search}
+              onChange={val => handleFilterChange('search', val)}
+            />
           </div>
-
           <div className="filter-group">
             <ListFilter
               label="Região"
@@ -121,6 +121,14 @@ const DashboardPage = () => {
             />
           </div>
           <div className="filter-group">
+            <SearchFilter
+              label="Cidade"
+              placeholder="Digite a cidade"
+              value={filters.cidade}
+              onChange={val => handleFilterChange('cidade', val)}
+            />
+          </div>
+          <div className="filter-group">
             <ListFilter
               label="Gênero"
               options={[
@@ -134,26 +142,17 @@ const DashboardPage = () => {
             />
           </div>
           <div className="filter-group">
-            <SearchFilter
-              label="Cidade"
-              placeholder="Digite a cidade"
-              value={filters.cidade}
-              onChange={val => handleFilterChange('cidade', val)}
-            />
-          </div>
-          <div className="filter-group">
-            <SearchFilter
-              label="Buscar"
-              placeholder="Nome, email ou CPF"
-              value={filters.search}
-              onChange={val => handleFilterChange('search', val)}
+            <BooleanFilter
+              label="Interação"
+              value={filters.interacao}
+              onChange={val => handleFilterChange('interacao', val)}
             />
           </div>
         </div>
         <div className="filters__actions">
           <button type="button" onClick={clearFilters}>Limpar filtros</button>
           <button type="button" className="export">
-            <Download /> Exportar
+            <Download size={16} /> Exportar
           </button>
         </div>
       </div>
@@ -196,7 +195,10 @@ const DashboardPage = () => {
             </thead>
             <tbody>
               {paginatedEleitores.map(e => (
-                <UserRow key={e.id} user={e} />
+                <UserRow key={e.id} user={{
+                  ...e,
+                  data_nascimento: e.data_nascimento || ''
+                }} />
               ))}
             </tbody>
           </table>

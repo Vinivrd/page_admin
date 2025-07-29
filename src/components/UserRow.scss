@@ -2,13 +2,18 @@
 
 .user-row {
   &:hover { background: $gray-50; }
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-
-  .avatar {
+  
+  &__cell {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+  }
+  
+  &__info {
+    display: flex;
+    align-items: center;
+  }
+  
+  &__avatar {
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
@@ -20,61 +25,85 @@
     font-weight: 600;
     margin-right: 0.75rem;
   }
-
-  .details {
-    .name { font-weight: 600; color: $text-dark; }
-    .email { font-size: 0.8rem; color: $gray-500; }
-    .cpf { font-size: 0.75rem; color: $gray-400; }
+  
+  &__details {
+    .user-row__name { font-weight: 600; color: $text-dark; }
+    .user-row__email { font-size: 0.8rem; color: $gray-500; }
+    .user-row__cpf { font-size: 0.75rem; color: $gray-400; }
+    .user-row__birthday { font-size: 0.75rem; color: $gray-400; }
   }
-}
-
-.location, .contact, .profession {
-  display: flex;
-  flex-direction: column;
-
-  div { margin-bottom: 0.25rem; }
-}
-
-.gender,
-.religion,
-.observations {
-  padding: 0.25rem 0;
-  font-size: 0.9rem;
-  color: $text-dark;
-}
-
-.social {
-  display: flex;
-  flex-direction: column;
-  .social__item {
-    font-size: 0.8rem;
-    color: $gray-700;
-    margin-bottom: 0.25rem;
+  
+  &__location, 
+  &__contact, 
+  &__profession {
+    display: flex;
+    flex-direction: column;
+    
+    div { margin-bottom: 0.25rem; }
   }
-}
-
-.interaction {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-
-  &.yes { background: $green-100; color: $green-600; }
-  &.no { background: $red-50; color: $red-600; }
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-
-  button {
+  
+  &__gender,
+  &__religion,
+  &__observations {
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+    color: $text-dark;
+  }
+  
+  &__social {
+    display: flex;
+    flex-direction: column;
+    
+    &-item {
+      font-size: 0.8rem;
+      color: $gray-700;
+      margin-bottom: 0.25rem;
+    }
+  }
+  
+  &__interaction {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    
+    &--yes { background: $green-100; color: $green-600; }
+    &--no { background: $red-50; color: $red-600; }
+  }
+  
+  &__actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    height: 100%;
+  }
+  
+  &__action-button {
     background: transparent;
     border: none;
     cursor: pointer;
     color: $gray-600;
-
-    &:hover { color: $gray-900; }
+    padding: 0.25rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    line-height: 0; /* Isso ajuda a centralizar os ícones */
+    
+    &:hover { 
+      color: $gray-900; 
+      background-color: $gray-100;
+    }
+  }
+  
+  &__icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
   }
 } 

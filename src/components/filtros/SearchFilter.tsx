@@ -13,6 +13,7 @@ const SearchFilter: FC<SearchFilterProps> = ({ value, placeholder, onChange, lab
   <div className="search-filter">
     {label && <label className="search-filter__label">{label}</label>}
     <div className="search-filter__wrapper">
+      <Search className="search-icon" size={16} />
       <input
         type="text"
         className="search-filter__input"
