@@ -31,6 +31,7 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -43,10 +44,38 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
     }
   };
 
+  const validateForm = () => {
+    // Validação básica dos campos obrigatórios
+    if (!formData.nome.trim()) {
+      setError('O nome é obrigatório.');
+      return false;
+    }
+    if (!formData.regiao) {
+      setError('A região é obrigatória.');
+      return false;
+    }
+    if (!formData.cidade.trim()) {
+      setError('A cidade é obrigatória.');
+      return false;
+    }
+    if (!formData.genero) {
+      setError('O gênero é obrigatório.');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
+    setSuccessMessage(null);
+    
+    // Validar o formulário antes de enviar
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
     
     try {
       const { data, error } = await addEleitor(formData);
@@ -56,8 +85,16 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
         return;
       }
       
+      setSuccessMessage('Eleitor cadastrado com sucesso!');
       console.log('Eleitor cadastrado com sucesso:', data);
-      onClose();
+      
+      // Resetar o formulário após o sucesso
+      resetForm();
+      
+      // Fechar o modal após um pequeno delay para mostrar a mensagem de sucesso
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
       setError(`Erro ao cadastrar eleitor: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
@@ -87,6 +124,7 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
       interacao: false,
     });
     setError(null);
+    setSuccessMessage(null);
   };
 
   const handleClose = () => {
@@ -109,6 +147,12 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
         {error && (
           <div className="error-message">
             {error}
+          </div>
+        )}
+        
+        {successMessage && (
+          <div className="success-message">
+            {successMessage}
           </div>
         )}
         
