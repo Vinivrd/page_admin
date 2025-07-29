@@ -1,0 +1,99 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  
+  &.error {
+    background-color: rgba($red-600, 0.1);
+    border-left: 4px solid $red-600;
+    
+    .error-message-icon {
+      color: $red-600;
+    }
+  }
+  
+  &.warning {
+    background-color: rgba($blue-500, 0.1);
+    border-left: 4px solid $blue-500;
+    
+    .error-message-icon {
+      color: $blue-500;
+    }
+  }
+  
+  .error-message-icon {
+    margin-right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .error-message-content {
+    flex: 1;
+    
+    .error-message-text {
+      margin: 0;
+      color: $text-light;
+      font-weight: 500;
+    }
+    
+    .error-message-details {
+      margin-top: 0.5rem;
+      
+      summary {
+        color: $secondary-color;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+      
+      p {
+        margin: 0.5rem 0 0;
+        font-size: 0.85rem;
+        color: $text-light;
+        opacity: 0.9;
+      }
+    }
+  }
+  
+  .error-message-dismiss {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: 0.75rem;
+    cursor: pointer;
+    color: $gray-400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      color: $gray-600;
+    }
+  }
+  
+  @media (prefers-color-scheme: light) {
+    .error-message-content {
+      .error-message-text,
+      .error-message-details p {
+        color: $text-dark;
+      }
+    }
+    
+    .error-message-dismiss {
+      &:hover {
+        color: $gray-800;
+      }
+    }
+  }
+} 

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import './AddUserModal.scss';
 import { addEleitor } from '../../services/eleitores.service';
+import ErrorMessage from '../ErrorMessage';
+import { EleitoresError } from '../../services/eleitores.service';
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -30,7 +32,7 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
     interacao: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{message: string, details?: string} | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -47,19 +49,19 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
   const validateForm = () => {
     // Validação básica dos campos obrigatórios
     if (!formData.nome.trim()) {
-      setError('O nome é obrigatório.');
+      setError({ message: 'O nome é obrigatório.' });
       return false;
     }
     if (!formData.regiao) {
-      setError('A região é obrigatória.');
+      setError({ message: 'A região é obrigatória.' });
       return false;
     }
     if (!formData.cidade.trim()) {
-      setError('A cidade é obrigatória.');
+      setError({ message: 'A cidade é obrigatória.' });
       return false;
     }
     if (!formData.genero) {
-      setError('O gênero é obrigatório.');
+      setError({ message: 'O gênero é obrigatório.' });
       return false;
     }
     return true;
@@ -67,22 +69,17 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccessMessage(null);
     
-    // Validar o formulário antes de enviar
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
     
     setIsSubmitting(true);
+    setError(null);
     
     try {
       const { data, error } = await addEleitor(formData);
       
       if (error) {
-        setError(`Erro ao cadastrar eleitor: ${error.message}`);
-        return;
+        throw error;
       }
       
       setSuccessMessage('Eleitor cadastrado com sucesso!');
@@ -96,7 +93,34 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
         onClose();
       }, 1500);
     } catch (err) {
-      setError(`Erro ao cadastrar eleitor: ${err instanceof Error ? err.message : String(err)}`);
+      console.error('Erro ao adicionar eleitor:', err);
+      
+      if (err instanceof EleitoresError) {
+        // Mensagens de erro mais amigáveis baseadas no código
+        let errorMessage = 'Erro ao adicionar eleitor';
+        
+        switch(err.code) {
+          case 'database/duplicate-entry':
+            errorMessage = 'Este eleitor já existe no sistema';
+            break;
+          case 'database/permission-denied':
+            errorMessage = 'Você não tem permissão para adicionar eleitores';
+            break;
+          case 'database/timeout':
+            errorMessage = 'Tempo esgotado. Verifique sua conexão';
+            break;
+        }
+        
+        setError({
+          message: errorMessage,
+          details: err.message
+        });
+      } else {
+        setError({
+          message: 'Erro ao adicionar eleitor. Tente novamente.',
+          details: err instanceof Error ? err.message : 'Erro desconhecido'
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -145,9 +169,12 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
         </div>
         
         {error && (
-          <div className="error-message">
-            {error}
-          </div>
+          <ErrorMessage 
+            message={error.message}
+            details={error.details}
+            variant="error"
+            onDismiss={() => setError(null)}
+          />
         )}
         
         {successMessage && (

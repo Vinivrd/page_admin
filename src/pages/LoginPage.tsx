@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import '../styles/login.scss';
-import { signIn } from '../services/auth.service';
+import { signIn, AuthError } from '../services/auth.service';
 import { useNavigate } from 'react-router-dom';
+import ErrorMessage from '../components/ErrorMessage';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [authError, setAuthError] = useState<{message: string, details?: string} | null>(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   // Monitorar o tamanho da janela para ajustes responsivos
@@ -67,17 +69,46 @@ export default function LoginPage() {
     if (!validateForm()) return;
     
     setIsLoading(true);
+    setAuthError(null);
     
     try {
       const { data, error } = await signIn(formData.email, formData.password);
       if (error) {
-        setErrors(prev => ({ ...prev, general: "Credencial invalida" }));
-        return;
+        throw error;
       }
       navigate('/dashboard');
     } catch (err) {
       console.error('Erro de login:', err);
-      setErrors(prev => ({ ...prev, general: 'Erro ao fazer login. Tente novamente.' }));
+      
+      if (err instanceof AuthError) {
+        // Mensagens de erro mais amigáveis baseadas no código
+        let errorMessage = 'Erro ao fazer login';
+        
+        switch(err.code) {
+          case 'auth/invalid-credentials':
+            errorMessage = 'Email ou senha incorretos';
+            break;
+          case 'auth/email-not-verified':
+            errorMessage = 'Por favor, verifique seu email antes de fazer login';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde';
+            break;
+          case 'auth/network-error':
+            errorMessage = 'Erro de conexão. Verifique sua internet';
+            break;
+        }
+        
+        setAuthError({
+          message: errorMessage,
+          details: err.message
+        });
+      } else {
+        setAuthError({
+          message: 'Erro ao fazer login. Tente novamente.',
+          details: err instanceof Error ? err.message : 'Erro desconhecido'
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -96,6 +127,16 @@ export default function LoginPage() {
             <h1 className="login-header__title">Bem-vindo</h1>
             <p className="login-header__subtitle">Faça login em sua conta admin</p>
           </div>
+
+          {/* Exibir mensagem de erro de autenticação */}
+          {authError && (
+            <ErrorMessage 
+              message={authError.message}
+              details={authError.details}
+              variant="error"
+              onDismiss={() => setAuthError(null)}
+            />
+          )}
 
           {/* Formulário */}
           <form className="login-form" onSubmit={handleSubmit} noValidate>
@@ -145,9 +186,6 @@ export default function LoginPage() {
               </div>
               {errors.password && (
                 <p className="login-form__error">{errors.password}</p>
-              )}
-              {errors.general && (
-                <p className="login-form__error">{errors.general}</p>
               )}
             </div>
 

@@ -6,6 +6,7 @@ import SearchFilter from '../components/filtros/SearchFilter';
 import UserRow from '../components/UserRow';
 import type { User } from '../components/UserRow';
 import { AddUserModal } from '../components/add-user';
+import ErrorMessage from '../components/ErrorMessage';
 import './DashboardPage.scss';
 import { fetchEleitores } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
@@ -16,21 +17,33 @@ const DashboardPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getEleitores = async () => {
       setLoading(true);
+      setError(null);
+      setErrorDetails(null);
+      
       try {
         const { data, error } = await fetchEleitores();
         if (error) {
-          setError('Erro ao buscar eleitores: ' + error.message);
+          setError('Erro ao buscar eleitores');
+          setErrorDetails(error.message);
           return;
         }
+        
+        if (!data || data.length === 0) {
+          setError('Nenhum eleitor encontrado');
+          return;
+        }
+        
         setEleitores(data || []);
       } catch (err) {
-        setError('Erro ao buscar eleitores: ' + (err instanceof Error ? err.message : String(err)));
+        setError('Erro ao buscar eleitores');
+        setErrorDetails(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
@@ -95,7 +108,7 @@ const DashboardPage = () => {
         <p>Gerenciamento de eleitores</p>
       </div>
 
-      {error && <p className="error">{error}</p>}
+      {error && <ErrorMessage message={error} details={errorDetails || undefined} />}
 
       <div className="dashboard__filters">
         <div className="filters__header">
