@@ -101,7 +101,6 @@ const UserRow: FC<UserRowProps> = memo(({ user }) => {
 // Componentes extraídos
 const UserInfo: FC<{ user: User }> = ({ user }) => (
   <div className="user-row__info">
-    <div className="user-row__avatar">{user.nome.charAt(0).toUpperCase()}</div>
     <div className="user-row__details">
       <div className="user-row__name">{user.nome}</div>
       <div className="user-row__email">{user.email}</div>
