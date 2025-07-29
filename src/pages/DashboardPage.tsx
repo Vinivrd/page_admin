@@ -117,12 +117,6 @@ const DashboardPage = () => {
         </div>
         <div className="filters__controls">
    
-          <SearchFilter
-            label="Buscar"
-            placeholder="Nome, email ou CPF"
-            value={filters.search}
-            onChange={val => handleFilterChange('search', val)}
-          />
                  
           <ListFilter
             label="Região"
@@ -137,14 +131,6 @@ const DashboardPage = () => {
             value={filters.regiao}
             onChange={val => handleFilterChange('regiao', val)}
           />
-         
-          <SearchFilter
-            label="Cidade"
-            placeholder="Digite a cidade"
-            value={filters.cidade}
-            onChange={val => handleFilterChange('cidade', val)}
-          />
-         
           <ListFilter
             label="Gênero"
             options={[
@@ -156,7 +142,7 @@ const DashboardPage = () => {
             value={filters.genero}
             onChange={val => handleFilterChange('genero', val)}
           />
-
+         
           <ListFilter
             label="Religião"
             options={[
@@ -171,6 +157,20 @@ const DashboardPage = () => {
             value={filters.religiao}
             onChange={val => handleFilterChange('religiao', val)}
             />
+          <SearchFilter
+            label="Buscar"
+            placeholder="Nome, email ou CPF"
+            value={filters.search}
+            onChange={val => handleFilterChange('search', val)}
+          />
+          <SearchFilter
+            label="Cidade"
+            placeholder="Digite a cidade"
+            value={filters.cidade}
+            onChange={val => handleFilterChange('cidade', val)}
+          />
+         
+
         
           <BooleanFilter
             label="Interação"
