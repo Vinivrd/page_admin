@@ -4,33 +4,11 @@ import BooleanFilter from '../components/filtros/BooleanFilter';
 import ListFilter from '../components/filtros/ListFilter';
 import SearchFilter from '../components/filtros/SearchFilter';
 import UserRow from '../components/UserRow';
+import type { User } from '../components/UserRow';
+import { AddUserModal } from '../components/add-user';
 import './DashboardPage.scss';
-import { supabase } from '../services/supabase';
-
-interface Eleitor {
-  id: string;
-  regiao: string;
-  bairro?: string;
-  cep?: string;
-  cidade: string;
-  nome: string;
-  email?: string;
-  escola?: string;
-  endereco?: string;
-  telefone?: string;
-  data_nascimento?: string;
-  cpf?: string;
-  instagram?: string;
-  facebook?: string;
-  tiktok?: string;
-  genero: string;
-  religiao?: string;
-  profissao?: string;
-  observacoes?: string;
-  interacao: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { fetchEleitores } from '../services/eleitores.service';
+import type { Eleitor } from '../services/eleitores.service';
 
 const DashboardPage = () => {
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
@@ -38,17 +16,26 @@ const DashboardPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [error, setError] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchEleitores = async () => {
-      const { data, error } = await supabase.from('eleitores').select('*');
-      if (error) {
-        setError('Erro ao buscar eleitores: ' + error.message);
-        return;
+    const getEleitores = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await fetchEleitores();
+        if (error) {
+          setError('Erro ao buscar eleitores: ' + error.message);
+          return;
+        }
+        setEleitores(data || []);
+      } catch (err) {
+        setError('Erro ao buscar eleitores: ' + (err instanceof Error ? err.message : String(err)));
+      } finally {
+        setLoading(false);
       }
-      setEleitores(data || []);
     };
-    fetchEleitores();
+    getEleitores();
   }, []);
 
   const filteredEleitores = useMemo(() => {
@@ -79,6 +66,24 @@ const DashboardPage = () => {
   const clearFilters = () => {
     setFilters({ regiao: '', interacao: '', genero: '', cidade: '', search: '', religiao: '' });
     setCurrentPage(1);  
+  };
+
+  const handleAddEleitorSuccess = () => {
+    // Recarregar os dados após adicionar um novo eleitor
+    const getEleitores = async () => {
+      try {
+        const { data, error } = await fetchEleitores();
+        if (error) {
+          setError('Erro ao buscar eleitores: ' + error.message);
+          return;
+        }
+        setEleitores(data || []);
+      } catch (err) {
+        setError('Erro ao buscar eleitores: ' + (err instanceof Error ? err.message : String(err)));
+      }
+    };
+    getEleitores();
+    setIsAddModalOpen(false);
   };
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
@@ -159,13 +164,13 @@ const DashboardPage = () => {
             value={filters.interacao}
             onChange={val => handleFilterChange('interacao', val)}
           />
-
-
        
         </div>
         <div className="filters__actions">
           <div>
-            <button type="button" className="adicionar"><span  className='plus-adicionar'>+</span> Adicionar</button> 
+            <button type="button" className="adicionar" onClick={() => setIsAddModalOpen(true)}>
+              <span className='plus-adicionar'>+</span> Adicionar
+            </button> 
           </div>
           <button type="button" onClick={clearFilters}>Limpar filtros</button>
           <button type="button" className="export">
@@ -194,42 +199,75 @@ const DashboardPage = () => {
           <h2>Lista de Eleitores</h2>
         </div>
         <div className="table__body">
-          <table>
-            <thead>
-              <tr>
-                <th>Usuário</th>
-                <th>Região/Cidade</th>
-                <th>Gênero</th>
-                <th>Religião</th>
-                <th>Contato</th>
-                <th>Redes Sociais</th>
-                <th>Prof/Escola</th>
-                <th>Observações</th>
-                <th>Interação</th>
-                <th>Cadastro</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedEleitores.map(e => (
-                <UserRow key={e.id} user={{
-                  ...e,
-                  data_nascimento: e.data_nascimento || ''
-                }} />
-              ))}
-            </tbody>
-          </table>
+          {loading ? (
+            <div className="loading-indicator">Carregando eleitores...</div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Região/Cidade</th>
+                  <th>Gênero</th>
+                  <th>Religião</th>
+                  <th>Contato</th>
+                  <th>Redes Sociais</th>
+                  <th>Prof/Escola</th>
+                  <th>Observações</th>
+                  <th>Interação</th>
+                  <th>Cadastro</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedEleitores.length > 0 ? (
+                  paginatedEleitores.map(e => (
+                    <UserRow key={e.id} user={{
+                      id: e.id || '',
+                      nome: e.nome,
+                      email: e.email,
+                      cpf: e.cpf,
+                      regiao: e.regiao,
+                      cidade: e.cidade,
+                      genero: e.genero,
+                      bairro: e.bairro,
+                      telefone: e.telefone,
+                      instagram: e.instagram,
+                      tiktok: e.tiktok,
+                      religiao: e.religiao,
+                      observacoes: e.observacoes,
+                      profissao: e.profissao,
+                      escola: e.escola,
+                      interacao: e.interacao,
+                      created_at: e.created_at || '',
+                      data_nascimento: e.data_nascimento || ''
+                    }} />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={11} className="empty-state">
+                      Nenhum eleitor encontrado com os filtros selecionados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
         <div className="dashboard__pagination">
           <button type="button" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
             <ChevronLeft />
           </button>
-          <span>Página {currentPage} de {totalPages}</span>
-          <button type="button" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
+          <span>Página {currentPage} de {totalPages || 1}</span>
+          <button type="button" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages || totalPages === 0}>
             <ChevronRight />
           </button>
         </div>
       </div>
+
+      <AddUserModal 
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </div>
   );
 };
