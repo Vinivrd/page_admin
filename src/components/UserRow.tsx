@@ -1,9 +1,10 @@
 import type { FC } from 'react';
 import { memo, useState } from 'react';
-import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import './UserRow.scss';
 import AddUserModal from './add-user/AddUserModal';
 import { toast } from 'react-toastify';
+import { deleteEleitor } from '../services/eleitores.service';
 
 // Movendo a interface User para um arquivo separado (simulado aqui)
 export interface User {
@@ -29,6 +30,7 @@ export interface User {
 
 interface UserRowProps {
   user: User;
+  onDeleted?: (id: string) => void;
 }
 
 // Funções de formatação movidas para fora do componente
@@ -47,7 +49,7 @@ const formatBirthDate = (dateString: string): string => {
 const formatNullableField = (value?: string): string => value || '-';
 
 // Componente principal com memo para evitar renderizações desnecessárias
-const UserRow: FC<UserRowProps> = memo(({ user }) => {
+const UserRow: FC<UserRowProps> = memo(({ user, onDeleted }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleEditClick = () => {
@@ -64,6 +66,28 @@ const UserRow: FC<UserRowProps> = memo(({ user }) => {
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handleDeleteClick = async () => {
+    if (!user.id) {
+      toast.error('ID do eleitor inválido.');
+      return;
+    }
+
+    const confirmed = window.confirm(`Tem certeza que deseja excluir o eleitor "${user.nome}"?`);
+    if (!confirmed) return;
+
+    try {
+      const { error } = await deleteEleitor(user.id);
+      if (error) {
+        toast.error(`Erro ao excluir: ${error.message}`);
+        return;
+      }
+      toast.success('Eleitor excluído com sucesso');
+      onDeleted?.(user.id);
+    } catch (err) {
+      toast.error('Erro inesperado ao excluir eleitor');
+    }
   };
 
   return (
@@ -112,7 +136,7 @@ const UserRow: FC<UserRowProps> = memo(({ user }) => {
                 <Edit size={16} />
               </span>
             </button>
-            <button type="button" className="user-row__action-button">
+            <button type="button" className="user-row__action-button" onClick={handleDeleteClick} aria-label={`Excluir ${user.nome}`}>
               <span className="user-row__icon-wrapper">
                 <Trash2 size={16} />
               </span>

@@ -72,7 +72,7 @@ export default function LoginPage() {
     setAuthError(null);
     
     try {
-      const { data, error } = await signIn(formData.email, formData.password);
+      const { error } = await signIn(formData.email, formData.password);
       if (error) {
         throw error;
       }

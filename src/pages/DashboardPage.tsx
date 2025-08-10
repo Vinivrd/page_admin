@@ -4,13 +4,12 @@ import BooleanFilter from '../components/filtros/BooleanFilter';
 import ListFilter from '../components/filtros/ListFilter';
 import SearchFilter from '../components/filtros/SearchFilter';
 import UserRow from '../components/UserRow';
-import type { User } from '../components/UserRow';
 import { AddUserModal } from '../components/add-user';
 import ErrorMessage from '../components/ErrorMessage';
 import './DashboardPage.scss';
 import { fetchEleitores } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
 
 const DashboardPage = () => {
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
@@ -72,6 +71,10 @@ const DashboardPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedEleitores = filteredEleitores.slice(startIndex, startIndex + itemsPerPage);
 
+  const handleEleitorDeleted = (id: string) => {
+    setEleitores(prev => prev.filter(e => e.id !== id));
+  };
+
   const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
@@ -82,28 +85,28 @@ const DashboardPage = () => {
     setCurrentPage(1);  
   };
 
-  const handleAddEleitorSuccess = () => {
-    // Recarregar os dados após adicionar um novo eleitor
-    const getEleitores = async () => {
-      try {
-        const { data, error } = await fetchEleitores();
-        if (error) {
-          setError('Erro ao buscar eleitores: ' + error.message);
-          toast.error('Erro ao atualizar lista de eleitores');
-          return;
-        }
-        setEleitores(data || []);
-        toast.success('Lista de eleitores atualizada com sucesso!');
-      } catch (err) {
-        setError('Erro ao buscar eleitores: ' + (err instanceof Error ? err.message : String(err)));
-        toast.error('Erro ao atualizar lista de eleitores');
-      }
-    };
-    getEleitores();
-    setIsAddModalOpen(false);
-  };
+  // const handleAddEleitorSuccess = () => {
+  //   // Recarregar os dados após adicionar um novo eleitor
+  //   const getEleitores = async () => {
+  //     try {
+  //       const { data, error } = await fetchEleitores();
+  //       if (error) {
+  //         setError('Erro ao buscar eleitores: ' + error.message);
+  //         toast.error('Erro ao atualizar lista de eleitores');
+  //         return;
+  //       }
+  //       setEleitores(data || []);
+  //       toast.success('Lista de eleitores atualizada com sucesso!');
+  //     } catch (err) {
+  //       setError('Erro ao buscar eleitores: ' + (err instanceof Error ? err.message : String(err)));
+  //       toast.error('Erro ao atualizar lista de eleitores');
+  //     }
+  //   };
+  //   getEleitores();
+  //   setIsAddModalOpen(false);
+  // };
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
+  // const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
 
   return (
     <div className="dashboard">
@@ -314,7 +317,7 @@ const DashboardPage = () => {
               <tbody>
                 {paginatedEleitores.length > 0 ? (
                   paginatedEleitores.map(e => (
-                    <UserRow key={e.id} user={{
+                    <UserRow key={e.id} onDeleted={handleEleitorDeleted} user={{
                       id: e.id || '',
                       nome: e.nome,
                       email: e.email,
