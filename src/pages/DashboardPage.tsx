@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Filter, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, Download } from 'lucide-react';
 import BooleanFilter from '../components/filtros/BooleanFilter';
 import ListFilter from '../components/filtros/ListFilter';
 import SearchFilter from '../components/filtros/SearchFilter';
@@ -7,7 +7,7 @@ import UserRow from '../components/UserRow';
 import { AddUserModal } from '../components/add-user';
 import ErrorMessage from '../components/ErrorMessage';
 import './DashboardPage.scss';
-import { fetchEleitores } from '../services/eleitores.service';
+import { fetchEleitoresPage } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
 // import { toast } from 'react-toastify';
 
@@ -15,61 +15,56 @@ const DashboardPage = () => {
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
   const [filters, setFilters] = useState({ regiao: '', interacao: '', genero: '', cidade: '', search: '', religiao: '' });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [pageSize] = useState(50);
+  const [totalCount, setTotalCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Helper: converter filtros da UI para filtros do serviço
+  const buildServiceFilters = () => ({
+    regiao: filters.regiao || undefined,
+    cidade: filters.cidade || undefined,
+    genero: filters.genero || undefined,
+    religiao: filters.religiao || undefined,
+    interacao: filters.interacao === '' ? undefined : filters.interacao === 'true',
+    search: filters.search || undefined,
+  });
+
+  // Carregar ao montar e quando filtros mudarem
   useEffect(() => {
-    const getEleitores = async () => {
+    const loadFirstPage = async () => {
       setLoading(true);
       setError(null);
       setErrorDetails(null);
-      
-      try {
-        const { data, error } = await fetchEleitores();
-        if (error) {
-          setError('Erro ao buscar eleitores');
-          setErrorDetails(error.message);
-          return;
-        }
-        
-        if (!data || data.length === 0) {
-          setError('Nenhum eleitor encontrado');
-          return;
-        }
-        
-        setEleitores(data || []);
-      } catch (err) {
+      setCurrentPage(1);
+      const { data, count, error } = await fetchEleitoresPage({
+        page: 1,
+        pageSize,
+        filters: buildServiceFilters(),
+      });
+
+      if (error) {
         setError('Erro ao buscar eleitores');
-        setErrorDetails(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
+        setErrorDetails(error.message);
+      } else {
+        setEleitores([...(data as Eleitor[])]);
+        setTotalCount(count);
       }
+      setLoading(false);
     };
-    getEleitores();
-  }, []);
+    loadFirstPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.regiao, filters.interacao, filters.genero, filters.cidade, filters.search, filters.religiao]);
 
-  const filteredEleitores = useMemo(() => {
-    return eleitores.filter(e => {
-      const matchesRegiao = !filters.regiao || e.regiao === filters.regiao;
-      const matchesInteracao = filters.interacao === '' || e.interacao.toString() === filters.interacao;
-      const matchesGenero = !filters.genero || e.genero === filters.genero;
-      const matchesCidade = !filters.cidade || e.cidade.toLowerCase().includes(filters.cidade.toLowerCase());
-      const matchesReligiao = !filters.religiao || e.religiao === filters.religiao;
-      const matchesSearch =
-        !filters.search ||
-        e.nome.toLowerCase().includes(filters.search.toLowerCase()) ||
-        (e.email?.toLowerCase().includes(filters.search.toLowerCase())) ||
-        (e.cpf?.includes(filters.search));
-      return matchesRegiao && matchesInteracao && matchesGenero && matchesCidade && matchesReligiao && matchesSearch;
-    });
-  }, [eleitores, filters]);
-
-  const totalPages = Math.ceil(filteredEleitores.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedEleitores = filteredEleitores.slice(startIndex, startIndex + itemsPerPage);
+  // Estatísticas sobre os itens carregados (já filtrados pelo backend)
+  const loadedStats = useMemo(() => ({
+    total: eleitores.length,
+    withInteraction: eleitores.filter(e => e.interacao).length,
+    withoutInteraction: eleitores.filter(e => !e.interacao).length,
+    lastCreatedAt: eleitores.length > 0 ? new Date(Math.max(...eleitores.map(e => new Date(e.created_at || '').getTime()))) : null,
+  }), [eleitores]);
 
   const handleEleitorDeleted = (id: string) => {
     setEleitores(prev => prev.filter(e => e.id !== id));
@@ -77,12 +72,10 @@ const DashboardPage = () => {
 
   const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-    setCurrentPage(1);
   };
 
   const clearFilters = () => {
     setFilters({ regiao: '', interacao: '', genero: '', cidade: '', search: '', religiao: '' });
-    setCurrentPage(1);  
   };
 
   // const handleAddEleitorSuccess = () => {
@@ -230,7 +223,7 @@ const DashboardPage = () => {
             </svg>
           </div>
           <div className="stat-card__content">
-            <div className="stat-card__value">{filteredEleitores.length}</div>
+              <div className="stat-card__value">{totalCount}</div>
             <div className="stat-card__label">Total de eleitores</div>
           </div>
         </div>
@@ -242,12 +235,12 @@ const DashboardPage = () => {
             </svg>
           </div>
           <div className="stat-card__content">
-            <div className="stat-card__value">{filteredEleitores.filter(e => e.interacao).length}</div>
+              <div className="stat-card__value">{loadedStats.withInteraction}</div>
             <div className="stat-card__label">Com interação</div>
           </div>
           <div className="stat-card__percentage">
-            {filteredEleitores.length > 0 ? 
-              `${Math.round((filteredEleitores.filter(e => e.interacao).length / filteredEleitores.length) * 100)}%` : 
+            {loadedStats.total > 0 ? 
+              `${Math.round((loadedStats.withInteraction / loadedStats.total) * 100)}%` : 
               '0%'
             }
           </div>
@@ -260,12 +253,12 @@ const DashboardPage = () => {
             </svg>
           </div>
           <div className="stat-card__content">
-            <div className="stat-card__value">{filteredEleitores.filter(e => !e.interacao).length}</div>
+              <div className="stat-card__value">{loadedStats.withoutInteraction}</div>
             <div className="stat-card__label">Sem interação</div>
           </div>
           <div className="stat-card__percentage">
-            {filteredEleitores.length > 0 ? 
-              `${Math.round((filteredEleitores.filter(e => !e.interacao).length / filteredEleitores.length) * 100)}%` : 
+            {loadedStats.total > 0 ? 
+              `${Math.round((loadedStats.withoutInteraction / loadedStats.total) * 100)}%` : 
               '0%'
             }
           </div>
@@ -280,8 +273,8 @@ const DashboardPage = () => {
           </div>
           <div className="stat-card__content">
             <div className="stat-card__value">
-              {filteredEleitores.length > 0 ? 
-                new Date(Math.max(...filteredEleitores.map(e => new Date(e.created_at || '').getTime()))).toLocaleDateString('pt-BR') : 
+              {loadedStats.lastCreatedAt ? 
+                loadedStats.lastCreatedAt.toLocaleDateString('pt-BR') : 
                 '-'
               }
             </div>
@@ -315,8 +308,8 @@ const DashboardPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedEleitores.length > 0 ? (
-                  paginatedEleitores.map(e => (
+                {eleitores.length > 0 ? (
+                  eleitores.map(e => (
                     <UserRow key={e.id} onDeleted={handleEleitorDeleted} user={{
                       id: e.id || '',
                       nome: e.nome,
@@ -350,13 +343,38 @@ const DashboardPage = () => {
           )}
         </div>
         <div className="dashboard__pagination">
-          <button type="button" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
-            <ChevronLeft />
-          </button>
-          <span>Página {currentPage} de {totalPages || 1}</span>
-          <button type="button" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages || totalPages === 0}>
-            <ChevronRight />
-          </button>
+          <button type="button" onClick={async () => {
+            if (loading || currentPage === 1) return;
+            setLoading(true);
+            const next = currentPage - 1;
+            const { data, count } = await fetchEleitoresPage({
+              page: next,
+              pageSize,
+              filters: buildServiceFilters(),
+            });
+            setEleitores([...(data as Eleitor[])]);
+            setTotalCount(count);
+            setCurrentPage(next);
+            setLoading(false);
+          }} disabled={loading || currentPage === 1}>Anterior</button>
+
+          <span>Página {currentPage} de {Math.max(1, Math.ceil(totalCount / pageSize))}</span>
+
+          <button type="button" onClick={async () => {
+            const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+            if (loading || currentPage >= totalPages) return;
+            setLoading(true);
+            const next = currentPage + 1;
+            const { data, count } = await fetchEleitoresPage({
+              page: next,
+              pageSize,
+              filters: buildServiceFilters(),
+            });
+            setEleitores([...(data as Eleitor[])]);
+            setTotalCount(count);
+            setCurrentPage(next);
+            setLoading(false);
+          }} disabled={loading || currentPage >= Math.max(1, Math.ceil(totalCount / pageSize))}>Próximo</button>
         </div>
       </div>
 

@@ -319,3 +319,135 @@ export async function searchEleitores(filters: {
     };
   }
 } 
+
+/**
+ * Busca eleitores com paginação por cursor (keyset)
+ */
+export async function fetchEleitoresKeyset(params: {
+  limit?: number;
+  cursor?: { created_at: string; id: string } | null;
+  filters?: {
+    search?: string;
+    regiao?: string;
+    cidade?: string;
+    genero?: string;
+    religiao?: string;
+    interacao?: boolean;
+  };
+}) {
+  const { limit = 50, cursor, filters } = params || {};
+
+  let query = supabase
+    .from('eleitores')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(limit);
+
+  // Filtros
+  if (filters) {
+    if (filters.regiao) query = query.eq('regiao', filters.regiao);
+    if (filters.cidade) query = query.ilike('cidade', `%${filters.cidade}%`);
+    if (filters.genero) query = query.eq('genero', filters.genero);
+    if (filters.religiao) query = query.eq('religiao', filters.religiao);
+    if (filters.interacao !== undefined) query = query.eq('interacao', filters.interacao);
+    if (filters.search) {
+      query = query.or(
+        `nome.ilike.%${filters.search}%,email.ilike.%${filters.search}%,cpf.eq.${filters.search}`
+      );
+    }
+  }
+
+  // Cursor (created_at,id) keyset
+  if (cursor && cursor.created_at && cursor.id) {
+    query = query.or(
+      `and(created_at.lt.${cursor.created_at}),and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
+    );
+  }
+
+  try {
+    const result = await query;
+    if (result.error) {
+      throw handleSupabaseError(result.error, 'Erro ao buscar eleitores (keyset)');
+    }
+
+    const data = result.data || [];
+    const last = data[data.length - 1] as Eleitor | undefined;
+    const nextCursor = last && last.created_at && (last as any).id
+      ? { created_at: String(last.created_at), id: String((last as any).id) }
+      : null;
+
+    return { data, nextCursor, error: null } as const;
+  } catch (err) {
+    if (err instanceof EleitoresError) {
+      return { data: [], nextCursor: null, error: err } as const;
+    }
+    return {
+      data: [],
+      nextCursor: null,
+      error: new EleitoresError(
+        err instanceof Error ? err.message : 'Erro desconhecido ao buscar eleitores (keyset)',
+        'database/keyset-error'
+      )
+    } as const;
+  }
+}
+
+/**
+ * Busca eleitores com paginação por página/tamanho (offset/range)
+ */
+export async function fetchEleitoresPage(params: {
+  page?: number; // 1-based
+  pageSize?: number;
+  filters?: {
+    search?: string;
+    regiao?: string;
+    cidade?: string;
+    genero?: string;
+    religiao?: string;
+    interacao?: boolean;
+  };
+}) {
+  const { page = 1, pageSize = 50, filters } = params || {};
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from('eleitores')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (filters) {
+    if (filters.regiao) query = query.eq('regiao', filters.regiao);
+    if (filters.cidade) query = query.ilike('cidade', `%${filters.cidade}%`);
+    if (filters.genero) query = query.eq('genero', filters.genero);
+    if (filters.religiao) query = query.eq('religiao', filters.religiao);
+    if (filters.interacao !== undefined) query = query.eq('interacao', filters.interacao);
+    if (filters.search) {
+      query = query.or(
+        `nome.ilike.%${filters.search}%,email.ilike.%${filters.search}%,cpf.eq.${filters.search}`
+      );
+    }
+  }
+
+  try {
+    const result = await query;
+    if (result.error) {
+      throw handleSupabaseError(result.error, 'Erro ao buscar eleitores (paginado)');
+    }
+    return { data: result.data || [], count: result.count || 0, error: null } as const;
+  } catch (err) {
+    if (err instanceof EleitoresError) {
+      return { data: [], count: 0, error: err } as const;
+    }
+    return {
+      data: [],
+      count: 0,
+      error: new EleitoresError(
+        err instanceof Error ? err.message : 'Erro desconhecido ao buscar eleitores (paginado)',
+        'database/page-error'
+      )
+    } as const;
+  }
+}
