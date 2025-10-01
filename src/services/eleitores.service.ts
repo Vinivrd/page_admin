@@ -1,26 +1,148 @@
 import { supabase } from './supabase';
 
+// =====================================================
+// ENUMS - Correspondem aos enums do banco de dados
+// =====================================================
+
+export enum RegiaoEnum {
+  CENTRO = 'Centro',
+  CONTINENTAIS = 'Continentais',
+  VILA_GALVAO = 'Vila Galvão',
+  BONSUCESSO = 'Bonsucesso',
+  COCAIA = 'Cocaia',
+  PIMENTAS = 'Pimentas',
+  CUMBICA = 'Cumbica',
+  CUMBICA_AEROPORTO = 'Cumbica aeroporto',
+  SAO_JOAO = 'São João',
+  TABOAO = 'Taboão',
+  TRANQUILIDADE = 'Tranquilidade'
+}
+
+export enum ReligiaoEnum {
+  CATOLICO = 'Católico',
+  EVANGELICO = 'Evangélico/Protestante',
+  ESPIRITA = 'Espírita',
+  UMBANDISTA = 'Umbandista',
+  CANDOMBLECISTA = 'Candomblecista',
+  BUDISTA = 'Budista',
+  ISLAMICO = 'Islâmico',
+  JUDEU = 'Judeu',
+  OUTRA = 'Outra'
+}
+
+export enum ProfissaoEnum {
+  DONA_DE_CASA = 'Dona de casa',
+  APOSENTADO = 'Aposentado',
+  AUTONOMO = 'Autônomo',
+  COMERCIANTE = 'Comerciante',
+  COMERCIARIO = 'Comerciário',
+  BANCARIO = 'Bancário',
+  PROFESSOR = 'Professor',
+  FUNCIONARIO_PUBLICO = 'Funcionário Público',
+  MEDICO = 'Médico',
+  AGENTE_SAUDE = 'Agente de saúde',
+  ENFERMEIRO = 'Enfermeiro',
+  ADVOGADO = 'Advogado',
+  ENGENHEIRO = 'Engenheiro',
+  TECNICO_GERAL = 'Técnico em geral',
+  TRABALHADOR_INFORMATICA = 'Trabalhador de Informática',
+  OUTRO = 'Outro'
+}
+
+export enum SegmentoSocialEnum {
+  SAUDE = 'Saúde',
+  EDUCACAO = 'Educação',
+  MORADIA = 'Moradia',
+  TRANSPORTE = 'Transporte',
+  ASSISTENCIA_SOCIAL = 'Assistência Social',
+  SEGURANCA = 'Segurança',
+  OUTRO = 'Outro'
+}
+
+export enum LiderancaEnum {
+  ARNALDO_SOUZA = 'Arnaldo Souza',
+  LUIZAO_SOUZA = 'Luizão Souza',
+  EDERSON = 'Ederson',
+  LUIZ_FABIO = 'Luiz Fábio',
+  DR_MARCELO = 'Dr Marcelo',
+  PROF_RENATO = 'Prof Renato',
+  SANDRAO = 'Sandrão',
+  DR_SEVERINO = 'Dr Severino',
+  JOSEFA = 'Josefa',
+  ZE_DINIZ = 'Zé Diniz',
+  ROSILDA = 'Rosilda',
+  MARKS = 'Marks',
+  ULISSES = 'Ulisses',
+  GILMAR = 'Gilmar',
+  CORREIOS = 'Correios',
+  APOSENTADOS = 'Aposentados',
+  OUTRA = 'Outra'
+}
+
+export enum GeneroEnum {
+  MASCULINO = 'MASCULINO',
+  FEMININO = 'FEMININO',
+  OUTROS = 'OUTROS'
+}
+
+// =====================================================
+// INTERFACE PRINCIPAL
+// =====================================================
+
 export interface Eleitor {
   id?: string;
-  regiao: string;
-  bairro?: string;
-  cep?: string;
-  cidade: string;
+  
+  // Dados pessoais básicos
   nome: string;
   email?: string;
-  escola?: string;
-  endereco?: string;
   telefone?: string;
   data_nascimento?: string;
   cpf?: string;
+  genero: GeneroEnum;
+  
+  // Endereço completo
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cep?: string;
+  regiao: RegiaoEnum;
+  cidade: string;
+  endereco?: string; // Campo legado, manter por compatibilidade
+  
+  // Dados obrigatórios
+  religiao?: ReligiaoEnum;
+  profissao: ProfissaoEnum;
+  segmento_social: SegmentoSocialEnum;
+  
+  // Campos "Outro/Outra" para especificação
+  religiao_outra?: string;
+  profissao_outra?: string;
+  segmento_social_outro?: string;
+  lideranca_outra?: string;
+  
+  // Controle de atendimentos
+  atendido_instituto: boolean;
+  atendido_demandas: boolean;
+  participante_atividades: boolean;
+  lideranca?: LiderancaEnum;
+  
+  // Datas de controle
+  data_instituto?: string;
+  data_demandas?: string;
+  data_atividades?: string;
+  
+  // Redes sociais
   instagram?: string;
   facebook?: string;
   tiktok?: string;
-  genero: string;
-  religiao?: string;
-  profissao?: string;
+  
+  // Outros
+  escola?: string;
   observacoes?: string;
   interacao: boolean;
+  
+  // Metadados
   created_at?: string;
   updated_at?: string;
 }
@@ -256,22 +378,39 @@ export async function deleteEleitor(id: string) {
   }
 }
 
-/**
- * Busca eleitores com filtros
- */
-export async function searchEleitores(filters: {
+// =====================================================
+// TIPOS PARA FILTROS
+// =====================================================
+
+export interface FiltrosEleitor {
   search?: string;
-  regiao?: string;
+  regiao?: RegiaoEnum | string;
+  bairro?: string;
   cidade?: string;
-  genero?: string;
-  religiao?: string;
+  genero?: GeneroEnum | string;
+  religiao?: ReligiaoEnum | string;
+  profissao?: ProfissaoEnum | string;
+  segmento_social?: SegmentoSocialEnum | string;
+  lideranca?: LiderancaEnum | string;
   interacao?: boolean;
-}) {
+  atendido_instituto?: boolean;
+  atendido_demandas?: boolean;
+  participante_atividades?: boolean;
+}
+
+/**
+ * Busca eleitores com filtros expandidos
+ */
+export async function searchEleitores(filters: FiltrosEleitor) {
   let query = supabase.from('eleitores').select('*');
 
   // Aplicar filtros se fornecidos
   if (filters.regiao) {
     query = query.eq('regiao', filters.regiao);
+  }
+
+  if (filters.bairro) {
+    query = query.ilike('bairro', `%${filters.bairro}%`);
   }
 
   if (filters.cidade) {
@@ -286,8 +425,32 @@ export async function searchEleitores(filters: {
     query = query.eq('religiao', filters.religiao);
   }
 
+  if (filters.profissao) {
+    query = query.eq('profissao', filters.profissao);
+  }
+
+  if (filters.segmento_social) {
+    query = query.eq('segmento_social', filters.segmento_social);
+  }
+
+  if (filters.lideranca) {
+    query = query.eq('lideranca', filters.lideranca);
+  }
+
   if (filters.interacao !== undefined) {
     query = query.eq('interacao', filters.interacao);
+  }
+
+  if (filters.atendido_instituto !== undefined) {
+    query = query.eq('atendido_instituto', filters.atendido_instituto);
+  }
+
+  if (filters.atendido_demandas !== undefined) {
+    query = query.eq('atendido_demandas', filters.atendido_demandas);
+  }
+
+  if (filters.participante_atividades !== undefined) {
+    query = query.eq('participante_atividades', filters.participante_atividades);
   }
 
   if (filters.search) {
@@ -326,14 +489,7 @@ export async function searchEleitores(filters: {
 export async function fetchEleitoresKeyset(params: {
   limit?: number;
   cursor?: { created_at: string; id: string } | null;
-  filters?: {
-    search?: string;
-    regiao?: string;
-    cidade?: string;
-    genero?: string;
-    religiao?: string;
-    interacao?: boolean;
-  };
+  filters?: FiltrosEleitor;
 }) {
   const { limit = 50, cursor, filters } = params || {};
 
@@ -344,13 +500,20 @@ export async function fetchEleitoresKeyset(params: {
     .order('id', { ascending: false })
     .limit(limit);
 
-  // Filtros
+  // Filtros expandidos
   if (filters) {
     if (filters.regiao) query = query.eq('regiao', filters.regiao);
+    if (filters.bairro) query = query.ilike('bairro', `%${filters.bairro}%`);
     if (filters.cidade) query = query.ilike('cidade', `%${filters.cidade}%`);
     if (filters.genero) query = query.eq('genero', filters.genero);
     if (filters.religiao) query = query.eq('religiao', filters.religiao);
+    if (filters.profissao) query = query.eq('profissao', filters.profissao);
+    if (filters.segmento_social) query = query.eq('segmento_social', filters.segmento_social);
+    if (filters.lideranca) query = query.eq('lideranca', filters.lideranca);
     if (filters.interacao !== undefined) query = query.eq('interacao', filters.interacao);
+    if (filters.atendido_instituto !== undefined) query = query.eq('atendido_instituto', filters.atendido_instituto);
+    if (filters.atendido_demandas !== undefined) query = query.eq('atendido_demandas', filters.atendido_demandas);
+    if (filters.participante_atividades !== undefined) query = query.eq('participante_atividades', filters.participante_atividades);
     if (filters.search) {
       query = query.or(
         `nome.ilike.%${filters.search}%,email.ilike.%${filters.search}%,cpf.eq.${filters.search}`
@@ -399,14 +562,7 @@ export async function fetchEleitoresKeyset(params: {
 export async function fetchEleitoresPage(params: {
   page?: number; // 1-based
   pageSize?: number;
-  filters?: {
-    search?: string;
-    regiao?: string;
-    cidade?: string;
-    genero?: string;
-    religiao?: string;
-    interacao?: boolean;
-  };
+  filters?: FiltrosEleitor;
 }) {
   const { page = 1, pageSize = 50, filters } = params || {};
   const from = (page - 1) * pageSize;
@@ -420,10 +576,17 @@ export async function fetchEleitoresPage(params: {
 
   if (filters) {
     if (filters.regiao) query = query.eq('regiao', filters.regiao);
+    if (filters.bairro) query = query.ilike('bairro', `%${filters.bairro}%`);
     if (filters.cidade) query = query.ilike('cidade', `%${filters.cidade}%`);
     if (filters.genero) query = query.eq('genero', filters.genero);
     if (filters.religiao) query = query.eq('religiao', filters.religiao);
+    if (filters.profissao) query = query.eq('profissao', filters.profissao);
+    if (filters.segmento_social) query = query.eq('segmento_social', filters.segmento_social);
+    if (filters.lideranca) query = query.eq('lideranca', filters.lideranca);
     if (filters.interacao !== undefined) query = query.eq('interacao', filters.interacao);
+    if (filters.atendido_instituto !== undefined) query = query.eq('atendido_instituto', filters.atendido_instituto);
+    if (filters.atendido_demandas !== undefined) query = query.eq('atendido_demandas', filters.atendido_demandas);
+    if (filters.participante_atividades !== undefined) query = query.eq('participante_atividades', filters.participante_atividades);
     if (filters.search) {
       query = query.or(
         `nome.ilike.%${filters.search}%,email.ilike.%${filters.search}%,cpf.eq.${filters.search}`
