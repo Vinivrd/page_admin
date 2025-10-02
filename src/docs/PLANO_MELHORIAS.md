@@ -68,8 +68,8 @@ data_atividades DATE
 
 #### 2.2 Criação de Tipos Auxiliares
 - [x] Tipo para filtros expandidos
-- [x] Tipo para campos de endereço
-- [x] Tipos para relatórios e exportação
+- [ ] Tipo para campos de endereço
+- [ ] Tipos para relatórios e exportação
 
 ---
 
@@ -107,7 +107,7 @@ data_atividades DATE
 *Tempo estimado: 2 dias*
 
 #### 4.1 Novos Filtros de Busca
-- [x] Filtro por região (múltipla seleção)
+- [ ] Filtro por região (múltipla seleção)
 - [ ] Filtro por bairro (texto livre)
 - [x] Filtro por religião (múltipla seleção)
 - [x] Filtro por profissão (múltipla seleção)
@@ -146,23 +146,6 @@ data_atividades DATE
 - [ ] Mensagens de validação mais claras
 - [ ] Tooltips explicativos
 - [ ] Confirmações para ações importantes
-
----
-
-### **FASE 6: Funcionalidades de Relatório**
-*Tempo estimado: 2 dias*
-
-#### 6.1 Exportação Expandida
-- [ ] Export incluindo todos os novos campos
-- [ ] Opção de export por filtros aplicados
-- [ ] Export em Excel (.xlsx) além do CSV
-- [ ] Templates de relatório pré-definidos
-
-#### 6.2 Relatórios Especializados
-- [ ] Relatório de atendimentos do Instituto
-- [ ] Relatório de demandas do mandato
-- [ ] Relatório de participantes de atividades
-- [ ] Relatório por liderança
 
 ---
 

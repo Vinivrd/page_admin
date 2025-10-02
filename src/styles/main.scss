@@ -66,25 +66,25 @@ button:focus-visible {
 
 .Toastify__toast--success {
   background-color: #e6f9e6;
-  color: darken($green-600, 15%);
+  color: color.adjust($green-600, $lightness: -15%);
   border-left: 4px solid $green-600;
 }
 
 .Toastify__toast--error {
   background-color: #f9e6e6;
-  color: darken(#f44336, 15%);
+  color: color.adjust(#f44336, $lightness: -15%);
   border-left: 4px solid #f44336;
 }
 
 .Toastify__toast--info {
   background-color: #e6f2ff;
-  color: darken($primary-color, 15%);
+  color: color.adjust($primary-color, $lightness: -15%);
   border-left: 4px solid $primary-color;
 }
 
 .Toastify__toast--warning {
   background-color: #fff8e6;
-  color: darken(#ff9800, 15%);
+  color: color.adjust(#ff9800, $lightness: -15%);
   border-left: 4px solid #ff9800;
 }
 

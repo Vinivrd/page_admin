@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../styles/variables' as *;
 
 .dashboard {
@@ -62,10 +63,6 @@
         align-items: stretch;
       }
 
-      &-primary {
-        // Área para o botão principal
-      }
-      
       &-secondary {
         display: flex;
         gap: 0.75rem;
@@ -114,12 +111,12 @@
         }
         
         &:hover {
-          background: darken($green-600, 5%);
+          background: color.adjust($green-600, $lightness: -5%);
           box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
         }
         
         &:active {
-          background: darken($green-600, 10%);
+          background: color.adjust($green-600, $lightness: -10%);
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
       }
@@ -150,11 +147,11 @@
           }
           
           &:hover {
-            background: darken($primary-color, 5%);
+            background: color.adjust($primary-color, $lightness: -5%);
           }
           
           &:active {
-            background: darken($primary-color, 10%);
+            background: color.adjust($primary-color, $lightness: -10%);
           }
         }
       }
