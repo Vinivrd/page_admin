@@ -253,6 +253,59 @@ const AdminUsersDashboard = () => {
     setError(null);
   };
 
+  const statsCards = useMemo(() => {
+    const totalEleitores = eleitores.length;
+    const filtrados = filteredEleitores.length;
+    const comInteracao = filteredEleitores.filter(u => u.interacao).length;
+    const semInteracao = Math.max(filtrados - comInteracao, 0);
+    const percent = (value: number, total: number) => {
+      if (total <= 0) return '0%';
+      const ratio = Math.round((value / total) * 100);
+      return `${ratio}%`;
+    };
+
+    const ultimoCadastroTimestamp = eleitores.reduce<number>((latest, eleitor) => {
+      if (!eleitor.created_at) return latest;
+      const current = new Date(eleitor.created_at).getTime();
+      if (Number.isNaN(current)) return latest;
+      return current > latest ? current : latest;
+    }, 0);
+
+    const ultimoCadastro = ultimoCadastroTimestamp
+      ? new Date(ultimoCadastroTimestamp).toLocaleDateString('pt-BR')
+      : '-';
+
+    return [
+      {
+        id: 'total',
+        label: 'Total de eleitores',
+        value: totalEleitores.toLocaleString('pt-BR'),
+        meta:
+          filtrados === totalEleitores
+            ? 'Todos exibidos'
+            : `${filtrados.toLocaleString('pt-BR')} filtrado(s)`
+      },
+      {
+        id: 'with-interaction',
+        label: 'Com interação',
+        value: comInteracao.toLocaleString('pt-BR'),
+        meta: percent(comInteracao, filtrados || totalEleitores)
+      },
+      {
+        id: 'without-interaction',
+        label: 'Sem interação',
+        value: semInteracao.toLocaleString('pt-BR'),
+        meta: percent(semInteracao, filtrados || totalEleitores)
+      },
+      {
+        id: 'last-created',
+        label: 'Último cadastro',
+        value: ultimoCadastro,
+        meta: filtrados > 0 ? `Referente ao conjunto atual` : 'Sem registros ativos'
+      }
+    ];
+  }, [eleitores, filteredEleitores]);
+
   // const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
 
   return (
@@ -331,20 +384,16 @@ const AdminUsersDashboard = () => {
               ))}
             </select>
           </div>
-          <div className="filter-group">
-            <label>Interação</label>
+          <div className="filter-group filter-group--boolean">
             <BooleanFilter label="Interação" value={filters.interacao} onChange={(val: string) => handleFilterChange('interacao', val)} options={FILTROS_BOOLEAN_OPTIONS} />
           </div>
-          <div className="filter-group">
-            <label>Atendido pelo Instituto</label>
+          <div className="filter-group filter-group--boolean">
             <BooleanFilter label="Atendido pelo Instituto" value={filters.atendido_instituto} onChange={(val: string) => handleFilterChange('atendido_instituto', val)} options={FILTROS_BOOLEAN_OPTIONS} />
           </div>
-          <div className="filter-group">
-            <label>Atendido por Demandas</label>
+          <div className="filter-group filter-group--boolean">
             <BooleanFilter label="Atendido por Demandas" value={filters.atendido_demandas} onChange={(val: string) => handleFilterChange('atendido_demandas', val)} options={FILTROS_BOOLEAN_OPTIONS} />
           </div>
-          <div className="filter-group">
-            <label>Participa de Atividades</label>
+          <div className="filter-group filter-group--boolean">
             <BooleanFilter label="Participa de Atividades" value={filters.participante_atividades} onChange={(val: string) => handleFilterChange('participante_atividades', val)} options={FILTROS_BOOLEAN_OPTIONS} />
           </div>
           <div className="filter-group">
@@ -402,22 +451,13 @@ const AdminUsersDashboard = () => {
       </div>
 
       <div className="dashboard__stats">
-        <div className="stat-card">
-          <div className="value">{`${filteredEleitores.length}/${eleitores.length}`}</div>
-          <div className="label">Resultados filtrados / total</div>
-        </div>
-        <div className="stat-card">
-          <div className="value">{filteredEleitores.filter(u => u.interacao).length}</div>
-          <div className="label">Com interação</div>
-        </div>
-        <div className="stat-card">
-          <div className="value">{filteredEleitores.filter(u => !u.interacao).length}</div>
-          <div className="label">Sem interação</div>
-        </div>
-        <div className="stat-card">
-          <div className="value">{new Set(filteredEleitores.map(u => u.regiao)).size}</div>
-          <div className="label">Regiões ativas</div>
-        </div>
+        {statsCards.map(card => (
+          <div key={card.id} className={`stat-card stat-card--${card.id}`}>
+            <span className="stat-card__label">{card.label}</span>
+            <strong className="stat-card__value">{card.value}</strong>
+            {card.meta && <span className="stat-card__meta">{card.meta}</span>}
+          </div>
+        ))}
       </div>
 
       <div className="dashboard__table">
@@ -503,12 +543,30 @@ const AdminUsersDashboard = () => {
           </tbody>
         </table>
         <div className="dashboard__pagination">
-          <button type="button" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
-            <ChevronLeft /> Anterior
+          <button
+            type="button"
+            className="pagination__button pagination__button--prev"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft size={18} />
+            <span>Anterior</span>
           </button>
-          <span>Página {currentPage} de {totalPages}</span>
-          <button type="button" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
-            Próximo <ChevronRight />
+
+          <span className="pagination__status">
+            Página <strong>{currentPage}</strong>
+            <span className="pagination__separator">de</span>
+            <strong>{totalPages || 1}</strong>
+          </span>
+
+          <button
+            type="button"
+            className="pagination__button pagination__button--next"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages || 1))}
+            disabled={currentPage === (totalPages || 1)}
+          >
+            <span>Próximo</span>
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>

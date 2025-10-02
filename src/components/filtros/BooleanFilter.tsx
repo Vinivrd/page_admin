@@ -22,7 +22,7 @@ const DEFAULT_OPTIONS: BooleanFilterOption[] = [
 const BooleanFilter: FC<BooleanFilterProps> = ({ label, value, onChange, options = DEFAULT_OPTIONS }) => {
   return (
     <div className="boolean-filter">
-      <label>{label}</label>
+      <span className="boolean-filter__title">{label}</span>
       <div className="boolean-filter__buttons">
         {options.map(option => (
           <button
