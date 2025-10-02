@@ -107,7 +107,7 @@ data_atividades DATE
 *Tempo estimado: 2 dias*
 
 #### 4.1 Novos Filtros de Busca
-- [ ] Filtro por região (múltipla seleção)
+- [x] Filtro por região (múltipla seleção)
 - [ ] Filtro por bairro (texto livre)
 - [x] Filtro por religião (múltipla seleção)
 - [x] Filtro por profissão (múltipla seleção)
@@ -133,7 +133,7 @@ data_atividades DATE
 - [x] Ajustar colunas exibidas conforme prioridade
 - [x] Adicionar indicadores visuais para status de atendimento
 - [ ] Melhorar responsividade da tabela
-- [ ] Implementar ordenação nas novas colunas
+- [x] Implementar ordenação nas novas colunas
 
 #### 5.2 Dashboard de Estatísticas
 - [ ] Cards com total por região

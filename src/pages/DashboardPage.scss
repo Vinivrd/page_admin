@@ -37,124 +37,168 @@
         color: $gray-800;
       }
     }
-
     .filters__controls {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1rem;
       margin-bottom: 1.25rem;
-      
+
       @media (max-width: 768px) {
         grid-template-columns: 1fr;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+
+        label {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: $gray-700;
+        }
+
+        select[multiple] {
+          min-height: 120px;
+          border-radius: 0.5rem;
+          border: 1px solid $gray-300;
+          padding: 0.5rem;
+          font-size: 0.85rem;
+          color: $gray-800;
+          background: $white;
+          transition: border-color 0.2s ease;
+
+          option {
+            padding: 0.25rem 0.35rem;
+          }
+
+          &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px color.adjust($primary-color, $lightness: 30%, $alpha: -0.6);
+          }
+        }
+
+        small {
+          font-size: 0.7rem;
+          color: $gray-500;
+        }
       }
     }
 
     .filters__actions {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      border-top: 1px solid $gray-200;
-      padding-top: 1.25rem;
-      margin-top: 0.5rem;
-      
-      @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      &-secondary {
-        display: flex;
-        gap: 0.75rem;
-        
-        @media (max-width: 768px) {
-          justify-content: space-between;
-        }
-      }
-      
-      // Estilos comuns para botões
-      button {
-        padding: 0.65rem 1rem;
-        border-radius: 0.5rem;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        
-        &:focus {
-          outline: 2px solid $primary-color;
-          outline-offset: 2px;
-        }
-        
-        &:active {
-          transform: translateY(1px);
-        }
-      }
-      
-      // Botão primário (verde)
-      .btn-primary {
-        background: $green-600;
-        color: white;
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        min-width: 140px;
-        
-        .btn-icon {
-          font-size: 1.2rem;
-          margin-right: 0.5rem;
-          font-weight: bold;
-        }
-        
-        &:hover {
-          background: color.adjust($green-600, $lightness: -5%);
-          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-        }
-        
-        &:active {
-          background: color.adjust($green-600, $lightness: -10%);
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-      }
-      
-      // Botões secundários
-      .btn-secondary {
-        background: $gray-100;
-        color: $gray-700;
-        border: 1px solid $gray-300;
-        padding: 0.75rem 1rem;
-        
-        &:hover {
-          background: $gray-200;
-          border-color: $gray-400;
-        }
-        
-        &:active {
-          background: $gray-300;
-        }
-        
-        &.btn-with-icon {
-          background: $primary-color;
-          color: white;
-          border: none;
-          
-          svg {
-            margin-right: 0.5rem;
-          }
-          
-          &:hover {
-            background: color.adjust($primary-color, $lightness: -5%);
-          }
-          
-          &:active {
+{{ ... }}
             background: color.adjust($primary-color, $lightness: -10%);
           }
         }
       }
+    }
+
+    @media (max-width: 1024px) {
+      .table__body {
+        table {
+          th, td {
+            padding: 0.6rem 0.75rem;
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      overflow-x: visible;
+
+      .table__body {
+        table, thead, tbody, th, td, tr {
+          display: block;
+        }
+
+        thead {
+          display: none;
+        }
+
+        tbody {
+          tr {
+            margin-bottom: 1rem;
+            border: 1px solid $gray-200;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          }
+
+          td {
+            border: none;
+            padding: 0.35rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: $gray-600;
+              flex-shrink: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+  .filters__summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+{{ ... }}
+    padding: 0.75rem 1rem;
+    background: $gray-50;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    color: $gray-700;
+
+    .summary-reset {
+      background: transparent;
+      border: none;
+      color: $primary-color;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+
+  .filters__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    .filters__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: $primary-50;
+      color: $primary-700;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid color.adjust($primary-100, $lightness: -10%);
     }
   }
 

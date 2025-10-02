@@ -16,9 +16,12 @@ import {
 } from '../services/enums.utils';
 
 type BooleanFilterValue = '' | 'true' | 'false';
+type SortDirection = 'asc' | 'desc';
+type SortKey = 'nome' | 'regiao' | 'profissao' | 'created_at';
 
 interface FiltersState {
-  regiao: string;
+  regioes: string[];
+  bairros: string[];
   interacao: BooleanFilterValue;
   genero: string;
   cidade: string;
@@ -33,7 +36,8 @@ interface FiltersState {
 }
 
 const initialFilters: FiltersState = {
-  regiao: '',
+  regioes: [],
+  bairros: [],
   interacao: '',
   genero: '',
   cidade: '',
@@ -49,10 +53,12 @@ const initialFilters: FiltersState = {
 
 const AdminUsersDashboard = () => {
   const [filters, setFilters] = useState<FiltersState>(initialFilters);
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
+  const [availableBairros, setAvailableBairros] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,6 +71,15 @@ const AdminUsersDashboard = () => {
         setError(error.message);
       } else {
         setEleitores(data || []);
+        const uniqueBairros = Array.from(
+          new Set(
+            (data || [])
+              .map(item => item.bairro?.trim())
+              .filter((bairro): bairro is string => Boolean(bairro && bairro.length > 0))
+              .map(bairro => bairro as string)
+          )
+        ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        setAvailableBairros(uniqueBairros);
       }
       setLoading(false);
     };
@@ -78,11 +93,15 @@ const AdminUsersDashboard = () => {
 
   const filteredEleitores = useMemo(() => {
     return eleitores.filter(e => {
-      const matchesRegiao = !filters.regiao || e.regiao === filters.regiao;
+      const matchesRegioes =
+        filters.regioes.length === 0 || (e.regiao && filters.regioes.includes(e.regiao));
       const matchesInteracao = parseBooleanFilter(filters.interacao) === undefined
         || e.interacao === parseBooleanFilter(filters.interacao);
       const matchesGenero = !filters.genero || e.genero === filters.genero;
       const matchesCidade = !filters.cidade || e.cidade.toLowerCase().includes(filters.cidade.toLowerCase());
+      const matchesBairros =
+        filters.bairros.length === 0 ||
+        filters.bairros.some(bairroFiltro => e.bairro?.toLowerCase() === bairroFiltro.toLowerCase());
       const matchesReligiao = !filters.religiao || e.religiao === filters.religiao;
       const matchesProfissao = !filters.profissao || e.profissao === filters.profissao;
       const matchesSegmento = !filters.segmento_social || e.segmento_social === filters.segmento_social;
@@ -99,10 +118,11 @@ const AdminUsersDashboard = () => {
         (e.cpf?.includes(filters.search));
 
       return (
-        matchesRegiao &&
+        matchesRegioes &&
         matchesInteracao &&
         matchesGenero &&
         matchesCidade &&
+        matchesBairros &&
         matchesReligiao &&
         matchesProfissao &&
         matchesSegmento &&
@@ -115,18 +135,122 @@ const AdminUsersDashboard = () => {
     });
   }, [eleitores, filters]);
 
-  const totalPages = Math.ceil(filteredEleitores.length / itemsPerPage);
+  const sortedEleitores = useMemo(() => {
+    if (!sortConfig) return filteredEleitores;
+
+    const data = [...filteredEleitores];
+    data.sort((a, b) => {
+      const { key, direction } = sortConfig;
+      let compareResult = 0;
+
+      const aValue = a[key];
+      const bValue = b[key];
+
+      if (key === 'created_at') {
+        const aDate = aValue ? new Date(String(aValue)).getTime() : 0;
+        const bDate = bValue ? new Date(String(bValue)).getTime() : 0;
+        compareResult = aDate - bDate;
+      } else {
+        const aString = (aValue ?? '').toString().toLowerCase();
+        const bString = (bValue ?? '').toString().toLowerCase();
+        compareResult = aString.localeCompare(bString, 'pt-BR');
+      }
+
+      return direction === 'asc' ? compareResult : -compareResult;
+    });
+
+    return data;
+  }, [filteredEleitores, sortConfig]);
+
+  const totalPages = Math.ceil(sortedEleitores.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedEleitores = filteredEleitores.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedEleitores = sortedEleitores.slice(startIndex, startIndex + itemsPerPage);
+
+  const toggleSort = (key: SortKey) => {
+    setSortConfig(prev => {
+      if (prev?.key === key) {
+        const nextDirection = prev.direction === 'asc' ? 'desc' : 'asc';
+        return { key, direction: nextDirection };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
 
   const handleFilterChange = (key: keyof FiltersState, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
 
+  const handleMultiSelectChange = (key: 'regioes', values: string[]) => {
+    setFilters(prev => ({ ...prev, [key]: values }));
+    setCurrentPage(1);
+  };
+
+  const handleBairrosChange = (values: string[]) => {
+    setFilters(prev => ({ ...prev, bairros: values }));
+    setCurrentPage(1);
+  };
+
+  const activeFilterBadges = useMemo(() => {
+    const badges: { label: string; value: string }[] = [];
+
+    if (filters.regioes.length > 0) {
+      badges.push({ label: 'Regiões', value: filters.regioes.join(', ') });
+    }
+
+    if (filters.bairros.length > 0) {
+      badges.push({ label: 'Bairros', value: filters.bairros.join(', ') });
+    }
+
+    if (filters.cidade.trim()) {
+      badges.push({ label: 'Cidade', value: filters.cidade });
+    }
+
+    if (filters.genero) {
+      badges.push({ label: 'Gênero', value: filters.genero });
+    }
+
+    if (filters.religiao) {
+      badges.push({ label: 'Religião', value: filters.religiao });
+    }
+
+    if (filters.profissao) {
+      badges.push({ label: 'Profissão', value: filters.profissao });
+    }
+
+    if (filters.segmento_social) {
+      badges.push({ label: 'Segmento', value: filters.segmento_social });
+    }
+
+    if (filters.lideranca) {
+      badges.push({ label: 'Liderança', value: filters.lideranca });
+    }
+
+    const booleanFilters: Array<{ key: keyof FiltersState; label: string }> = [
+      { key: 'interacao', label: 'Interação' },
+      { key: 'atendido_instituto', label: 'Atendido Instituto' },
+      { key: 'atendido_demandas', label: 'Atendido Demandas' },
+      { key: 'participante_atividades', label: 'Participa Atividades' }
+    ];
+
+    booleanFilters.forEach(({ key, label }) => {
+      const value = filters[key];
+      if (value !== '') {
+        badges.push({ label, value: value === 'true' ? 'Sim' : 'Não' });
+      }
+    });
+
+    if (filters.search.trim()) {
+      badges.push({ label: 'Busca', value: filters.search });
+    }
+
+    return badges;
+  }, [filters]);
+
   const clearFilters = () => {
     setFilters(initialFilters);
     setCurrentPage(1);
+    setError(null);
   };
 
   // const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
@@ -145,13 +269,22 @@ const AdminUsersDashboard = () => {
         </div>
         <div className="filters__controls">
           <div className="filter-group">
-            <label>Região</label>
-            <select value={filters.regiao} onChange={e => handleFilterChange('regiao', e.target.value)}>
-              <option value="">Todas</option>
+            <label>Regiões</label>
+            <select
+              multiple
+              value={filters.regioes}
+              onChange={e =>
+                handleMultiSelectChange(
+                  'regioes',
+                  Array.from(e.target.selectedOptions, option => option.value)
+                )
+              }
+            >
               {REGIOES_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
+            <small>Use Ctrl/Cmd para selecionar múltiplas regiões</small>
           </div>
           <div className="filter-group">
             <label>Gênero</label>
@@ -219,6 +352,23 @@ const AdminUsersDashboard = () => {
             <input type="text" value={filters.cidade} onChange={e => handleFilterChange('cidade', e.target.value)} placeholder="Digite a cidade" />
           </div>
           <div className="filter-group">
+            <label>Bairros</label>
+            <select
+              multiple
+              value={filters.bairros}
+              onChange={e =>
+                handleBairrosChange(Array.from(e.target.selectedOptions, option => option.value))
+              }
+            >
+              {availableBairros.map(bairro => (
+                <option key={bairro} value={bairro}>
+                  {bairro}
+                </option>
+              ))}
+            </select>
+            <small>Use Ctrl/Cmd para selecionar múltiplos bairros</small>
+          </div>
+          <div className="filter-group">
             <label>Buscar</label>
             <div className="search-wrapper">
               <Search />
@@ -226,6 +376,23 @@ const AdminUsersDashboard = () => {
             </div>
           </div>
         </div>
+        <div className="filters__summary">
+          <span>Resultados filtrados: <strong>{filteredEleitores.length}</strong> de {eleitores.length}</span>
+          {sortConfig && (
+            <button type="button" className="summary-reset" onClick={() => setSortConfig(null)}>
+              Remover ordenação
+            </button>
+          )}
+        </div>
+        {activeFilterBadges.length > 0 && (
+          <div className="filters__badges">
+            {activeFilterBadges.map(badge => (
+              <span key={`${badge.label}-${badge.value}`} className="filters__badge">
+                <strong>{badge.label}:</strong> {badge.value}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="filters__actions">
           <button type="button" onClick={clearFilters}>Limpar filtros</button>
           <button type="button" className="export">
@@ -236,8 +403,8 @@ const AdminUsersDashboard = () => {
 
       <div className="dashboard__stats">
         <div className="stat-card">
-          <div className="value">{filteredEleitores.length}</div>
-          <div className="label">Total de usuários</div>
+          <div className="value">{`${filteredEleitores.length}/${eleitores.length}`}</div>
+          <div className="label">Resultados filtrados / total</div>
         </div>
         <div className="stat-card">
           <div className="value">{filteredEleitores.filter(u => u.interacao).length}</div>
@@ -257,16 +424,32 @@ const AdminUsersDashboard = () => {
         <table>
           <thead>
             <tr>
-              <th>Usuário</th>
-              <th>Região/Cidade</th>
+              <th>
+                <button type="button" onClick={() => toggleSort('nome')}>
+                  Usuário {sortConfig?.key === 'nome' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                </button>
+              </th>
+              <th>
+                <button type="button" onClick={() => toggleSort('regiao')}>
+                  Região/Cidade {sortConfig?.key === 'regiao' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                </button>
+              </th>
               <th>Contato</th>
-              <th>Profissão</th>
+              <th>
+                <button type="button" onClick={() => toggleSort('profissao')}>
+                  Profissão {sortConfig?.key === 'profissao' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                </button>
+              </th>
               <th>Segmento</th>
               <th>Religião</th>
               <th>Liderança</th>
               <th>Atendimentos</th>
               <th>Interação</th>
-              <th>Data Cadastro</th>
+              <th>
+                <button type="button" onClick={() => toggleSort('created_at')}>
+                  Data Cadastro {sortConfig?.key === 'created_at' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                </button>
+              </th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -311,7 +494,6 @@ const AdminUsersDashboard = () => {
                     data_atividades: e.data_atividades,
                     escola: e.escola,
                     interacao: e.interacao,
-                    observacoes: e.observacoes,
                     created_at: e.created_at || '',
                     data_nascimento: e.data_nascimento || ''
                   }}
