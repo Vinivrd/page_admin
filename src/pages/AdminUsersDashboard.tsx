@@ -474,16 +474,16 @@ const AdminUsersDashboard = () => {
                   Região/Cidade {sortConfig?.key === 'regiao' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
                 </button>
               </th>
+              <th>Gênero</th>
+              <th>Religião</th>
               <th>Contato</th>
+              <th>Redes Sociais</th>
               <th>
                 <button type="button" onClick={() => toggleSort('profissao')}>
-                  Profissão {sortConfig?.key === 'profissao' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                  Prof./Escola {sortConfig?.key === 'profissao' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
                 </button>
               </th>
-              <th>Segmento</th>
-              <th>Religião</th>
-              <th>Liderança</th>
-              <th>Atendimentos</th>
+              <th>Observações</th>
               <th>Interação</th>
               <th>
                 <button type="button" onClick={() => toggleSort('created_at')}>

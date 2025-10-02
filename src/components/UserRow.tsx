@@ -129,29 +129,22 @@ const UserRow: FC<UserRowProps> = memo(({ user, onDeleted }) => {
           <Location user={user} />
         </td>
         <td className="user-row__cell">
-          <ContactInfo user={user} />
-        </td>
-        <td className="user-row__cell">
-          <Profession profissao={user.profissao} profissaoOutra={user.profissao_outra} escola={user.escola} />
-        </td>
-        <td className="user-row__cell">
-          <SegmentoInfo segmento={user.segmento_social} outro={user.segmento_social_outro} />
+          <div className="user-row__gender">{formatNullableField(user.genero)}</div>
         </td>
         <td className="user-row__cell">
           <div className="user-row__religion">{formatEnumWithOther(user.religiao, user.religiao_outra)}</div>
         </td>
         <td className="user-row__cell">
-          <div className="user-row__leadership">{formatEnumWithOther(user.lideranca, user.lideranca_outra)}</div>
+          <ContactInfo telefone={user.telefone} email={user.email} />
         </td>
         <td className="user-row__cell">
-          <AtendimentosInfo
-            atendidoInstituto={user.atendido_instituto}
-            atendidoDemandas={user.atendido_demandas}
-            participanteAtividades={user.participante_atividades}
-            dataInstituto={user.data_instituto}
-            dataDemandas={user.data_demandas}
-            dataAtividades={user.data_atividades}
-          />
+          <SocialInfo instagram={user.instagram} facebook={user.facebook} tiktok={user.tiktok} />
+        </td>
+        <td className="user-row__cell">
+          <Profession profissao={user.profissao} profissaoOutra={user.profissao_outra} escola={user.escola} />
+        </td>
+        <td className="user-row__cell">
+          <div className="user-row__observacoes">{formatNullableField(user.observacoes)}</div>
         </td>
         <td className="user-row__cell">
           <span className={`user-row__interaction ${user.interacao ? 'user-row__interaction--yes' : 'user-row__interaction--no'}`}>
@@ -211,16 +204,19 @@ const Location: FC<{ user: User }> = ({ user }) => (
   </div>
 );
 
-const ContactInfo: FC<{ user: User }> = ({ user }) => (
+const ContactInfo: FC<{ telefone?: string; email?: string }> = ({ telefone, email }) => (
   <div className="user-row__contact">
-    <div className="user-row__phone">{formatNullableField(user.telefone)}</div>
-    <div className="user-row__email-small">{formatNullableField(user.email)}</div>
-    <div className="user-row__social">
-      {user.instagram && <span className="user-row__social-item">IG: {user.instagram}</span>}
-      {user.facebook && <span className="user-row__social-item">FB: {user.facebook}</span>}
-      {user.tiktok && <span className="user-row__social-item">TT: {user.tiktok}</span>}
-      {!user.instagram && !user.facebook && !user.tiktok && <span className="user-row__social-item">-</span>}
-    </div>
+    <div className="user-row__phone">{formatNullableField(telefone)}</div>
+    <div className="user-row__email-small">{formatNullableField(email)}</div>
+  </div>
+);
+
+const SocialInfo: FC<{ instagram?: string; facebook?: string; tiktok?: string }> = ({ instagram, facebook, tiktok }) => (
+  <div className="user-row__social">
+    {instagram && <span className="user-row__social-item">IG: {instagram}</span>}
+    {facebook && <span className="user-row__social-item">FB: {facebook}</span>}
+    {tiktok && <span className="user-row__social-item">TT: {tiktok}</span>}
+    {!instagram && !facebook && !tiktok && <span className="user-row__social-item">-</span>}
   </div>
 );
 
@@ -228,38 +224,6 @@ const Profession: FC<{ profissao?: string; profissaoOutra?: string; escola?: str
   <div className="user-row__profession">
     <div className="user-row__job">{formatEnumWithOther(profissao, profissaoOutra)}</div>
     <div className="user-row__school">{formatNullableField(escola)}</div>
-  </div>
-);
-
-const SegmentoInfo: FC<{ segmento?: string; outro?: string }> = ({ segmento, outro }) => (
-  <div className="user-row__segmento">{formatEnumWithOther(segmento, outro)}</div>
-);
-
-const AtendimentosInfo: FC<{
-  atendidoInstituto: boolean;
-  atendidoDemandas: boolean;
-  participanteAtividades: boolean;
-  dataInstituto?: string;
-  dataDemandas?: string;
-  dataAtividades?: string;
-}> = ({
-  atendidoInstituto,
-  atendidoDemandas,
-  participanteAtividades,
-  dataInstituto,
-  dataDemandas,
-  dataAtividades
-}) => (
-  <div className="user-row__atendimentos">
-    <div className={`user-row__atendimento ${atendidoInstituto ? 'ativo' : ''}`}>
-      Instituto: {atendidoInstituto ? formatDate(dataInstituto) : 'Não'}
-    </div>
-    <div className={`user-row__atendimento ${atendidoDemandas ? 'ativo' : ''}`}>
-      Demandas: {atendidoDemandas ? formatDate(dataDemandas) : 'Não'}
-    </div>
-    <div className={`user-row__atendimento ${participanteAtividades ? 'ativo' : ''}`}>
-      Atividades: {participanteAtividades ? formatDate(dataAtividades) : 'Não'}
-    </div>
   </div>
 );
 
