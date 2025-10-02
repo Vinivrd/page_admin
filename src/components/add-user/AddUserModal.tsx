@@ -158,7 +158,8 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
         id="data_nascimento"
         name="data_nascimento"
         inputMode="numeric"
-        pattern="\\d{2}/\\d{2}/\\d{4}"
+        pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+        title="Formato: DD/MM/AAAA"
         placeholder="DD/MM/AAAA"
         value={formData.data_nascimento}
         onChange={onInputChange}
@@ -372,30 +373,21 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
       id="atendido_instituto"
       label="Atendido pelo Instituto"
       checked={formData.atendido_instituto}
-      dateField="data_instituto"
-      dateValue={formData.data_instituto}
       onCheckboxChange={onCheckboxChange}
-      onInputChange={onInputChange}
     />
 
     <AtendimentoCheckbox
       id="atendido_demandas"
       label="Atendido por Demandas"
       checked={formData.atendido_demandas}
-      dateField="data_demandas"
-      dateValue={formData.data_demandas}
       onCheckboxChange={onCheckboxChange}
-      onInputChange={onInputChange}
     />
 
     <AtendimentoCheckbox
       id="participante_atividades"
       label="Participa de Atividades"
       checked={formData.participante_atividades}
-      dateField="data_atividades"
-      dateValue={formData.data_atividades}
       onCheckboxChange={onCheckboxChange}
-      onInputChange={onInputChange}
     />
   </div>
 )
@@ -404,27 +396,13 @@ interface AtendimentoCheckboxProps {
   id: 'atendido_instituto' | 'atendido_demandas' | 'participante_atividades'
   label: string
   checked: boolean
-  dateField: 'data_instituto' | 'data_demandas' | 'data_atividades'
-  dateValue: string
   onCheckboxChange: UseEleitorFormReturn['handleCheckboxChange']
-  onInputChange: UseEleitorFormReturn['handleInputChange']
 }
 
-const AtendimentoCheckbox = ({ id, label, checked, dateField, dateValue, onCheckboxChange, onInputChange }: AtendimentoCheckboxProps) => (
+const AtendimentoCheckbox = ({ id, label, checked, onCheckboxChange }: AtendimentoCheckboxProps) => (
   <div className="form-group checkbox-group">
     <input type="checkbox" id={id} name={id} checked={checked} onChange={onCheckboxChange} />
     <label htmlFor={id}>{label}</label>
-    <input
-      type="text"
-      id={dateField}
-      name={dateField}
-      inputMode="numeric"
-      pattern="\\d{2}/\\d{2}/\\d{4}"
-      placeholder="DD/MM/AAAA"
-      value={dateValue}
-      onChange={onInputChange}
-      disabled={!checked}
-    />
   </div>
 )
 

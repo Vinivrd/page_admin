@@ -351,7 +351,7 @@ const AdminUsersDashboard = () => {
           <div className="filter-group">
             <label>Religião</label>
             <select value={filters.religiao} onChange={e => handleFilterChange('religiao', e.target.value)}>
-              <option value="">Todas</option>
+              <option value="">Selecione</option>
               {RELIGIOES_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}

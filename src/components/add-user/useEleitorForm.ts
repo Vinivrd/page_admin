@@ -6,6 +6,7 @@ import {
   updateEleitor,
   EleitoresError,
   type Eleitor,
+  type EleitorUpsertPayload,
   RegiaoEnum,
   ReligiaoEnum,
   ProfissaoEnum,
@@ -48,9 +49,6 @@ export type EleitorFormData = {
   atendido_instituto: boolean
   atendido_demandas: boolean
   participante_atividades: boolean
-  data_instituto: string
-  data_demandas: string
-  data_atividades: string
   instagram: string
   facebook: string
   tiktok: string
@@ -103,9 +101,6 @@ const createEmptyFormData = (): EleitorFormData => ({
   atendido_instituto: false,
   atendido_demandas: false,
   participante_atividades: false,
-  data_instituto: '',
-  data_demandas: '',
-  data_atividades: '',
   instagram: '',
   facebook: '',
   tiktok: '',
@@ -113,23 +108,66 @@ const createEmptyFormData = (): EleitorFormData => ({
   interacao: false
 })
 
+const BRAZILIAN_DATE_REGEX = /^\d{2}\/\d{2}\/\d{4}$/
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
+const ISO_DATE_SLASH_REGEX = /^\d{4}\/\d{2}\/\d{2}$/
+
 const formatDateToDisplay = (value?: string | null) => {
   if (!value) return ''
-  const iso = value.includes('T') ? value.split('T')[0] : value
-  const [year, month, day] = iso.split('-')
-  if (!year || !month || !day) return ''
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+
+  if (BRAZILIAN_DATE_REGEX.test(trimmed)) {
+    return trimmed
+  }
+
+  const normalized = trimmed.includes('T') ? trimmed.split('T')[0] : trimmed
+  const match = normalized.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/)
+  if (!match) return ''
+
+  const [, year, month, day] = match
   return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`
 }
 
 const maskDisplayDate = (raw: string) => {
-  const digits = raw.replace(/\D/g, '').slice(0, 8)
+  const trimmed = raw.trim()
+  if (!trimmed) return ''
+
+  if (ISO_DATE_REGEX.test(trimmed) || ISO_DATE_SLASH_REGEX.test(trimmed)) {
+    const [year, month, day] = trimmed.split(/[-/]/)
+    return `${day}/${month}/${year}`
+  }
+
+  if (BRAZILIAN_DATE_REGEX.test(trimmed)) {
+    return trimmed
+  }
+
+  const digits = trimmed.replace(/\D/g, '').slice(0, 8)
+  if (digits.length === 0) return ''
   if (digits.length <= 2) return digits
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
 }
 
 const parseDisplayDateToISO = (displayValue: string) => {
-  const digits = displayValue.replace(/\D/g, '')
+  const trimmed = displayValue.trim()
+  if (!trimmed) return undefined
+
+  if (ISO_DATE_REGEX.test(trimmed)) {
+    return trimmed
+  }
+
+  if (ISO_DATE_SLASH_REGEX.test(trimmed)) {
+    const [year, month, day] = trimmed.split('/')
+    return `${year}-${month}-${day}`
+  }
+
+  if (!BRAZILIAN_DATE_REGEX.test(trimmed)) {
+    const digitsCheck = trimmed.replace(/\D/g, '')
+    if (digitsCheck.length !== 8) return undefined
+  }
+
+  const digits = trimmed.replace(/\D/g, '')
   if (digits.length !== 8) return undefined
 
   const day = digits.slice(0, 2)
@@ -152,9 +190,9 @@ const parseDisplayDateToISO = (displayValue: string) => {
 
 const trimOrEmpty = (value?: string | null) => value?.trim() ?? ''
 
-const stringOrUndefined = (value: string) => {
+const stringOrNull = (value: string) => {
   const trimmed = value.trim()
-  return trimmed ? trimmed : undefined
+  return trimmed ? trimmed : null
 }
 
 const mapEleitorToFormData = (eleitor: Eleitor): EleitorFormData => ({
@@ -183,9 +221,6 @@ const mapEleitorToFormData = (eleitor: Eleitor): EleitorFormData => ({
   atendido_instituto: Boolean(eleitor.atendido_instituto),
   atendido_demandas: Boolean(eleitor.atendido_demandas),
   participante_atividades: Boolean(eleitor.participante_atividades),
-  data_instituto: formatDateToDisplay(eleitor.data_instituto),
-  data_demandas: formatDateToDisplay(eleitor.data_demandas),
-  data_atividades: formatDateToDisplay(eleitor.data_atividades),
   instagram: trimOrEmpty(eleitor.instagram),
   facebook: trimOrEmpty(eleitor.facebook),
   tiktok: trimOrEmpty(eleitor.tiktok),
@@ -193,54 +228,52 @@ const mapEleitorToFormData = (eleitor: Eleitor): EleitorFormData => ({
   interacao: Boolean(eleitor.interacao)
 })
 
-const buildEleitorPayload = (
-  data: EleitorFormData
-): Omit<Eleitor, 'id' | 'created_at' | 'updated_at'> => {
+const buildEleitorPayload = (data: EleitorFormData): EleitorUpsertPayload => {
   const religiao = data.religiao ? (data.religiao as ReligiaoEnum) : undefined
   const profissao = data.profissao as ProfissaoEnum
   const segmento = data.segmento_social as SegmentoSocialEnum
   const lideranca = data.lideranca ? (data.lideranca as LiderancaEnum) : undefined
-  const religiaoOutra = religiao === ReligiaoEnum.OUTRA ? stringOrUndefined(data.religiao_outra) : undefined
-  const profissaoOutra = profissao === ProfissaoEnum.OUTRO ? stringOrUndefined(data.profissao_outra) : undefined
-  const segmentoOutro = segmento === SegmentoSocialEnum.OUTRO ? stringOrUndefined(data.segmento_social_outro) : undefined
-  const liderancaOutra = lideranca === LiderancaEnum.OUTRA ? stringOrUndefined(data.lideranca_outra) : undefined
+  const religiaoOutra = religiao === ReligiaoEnum.OUTRA ? stringOrNull(data.religiao_outra) : null
+  const profissaoOutra = profissao === ProfissaoEnum.OUTRO ? stringOrNull(data.profissao_outra) : null
+  const segmentoOutro = segmento === SegmentoSocialEnum.OUTRO ? stringOrNull(data.segmento_social_outro) : null
+  const liderancaOutra = lideranca === LiderancaEnum.OUTRA ? stringOrNull(data.lideranca_outra) : null
 
   const dataNascimentoISO = parseDisplayDateToISO(data.data_nascimento)
 
   return {
     nome: data.nome.trim(),
-    email: stringOrUndefined(data.email),
-    telefone: stringOrUndefined(data.telefone),
-    data_nascimento: dataNascimentoISO,
-    cpf: stringOrUndefined(data.cpf),
+    email: stringOrNull(data.email),
+    telefone: stringOrNull(data.telefone),
+    data_nascimento: dataNascimentoISO ?? null,
+    cpf: stringOrNull(data.cpf),
     genero: data.genero as GeneroEnum,
-    rua: stringOrUndefined(data.rua),
-    numero: stringOrUndefined(data.numero),
-    complemento: stringOrUndefined(data.complemento),
-    bairro: stringOrUndefined(data.bairro),
-    cep: stringOrUndefined(data.cep),
+    rua: stringOrNull(data.rua),
+    numero: stringOrNull(data.numero),
+    complemento: stringOrNull(data.complemento),
+    bairro: stringOrNull(data.bairro),
+    cep: stringOrNull(data.cep),
     regiao: data.regiao as RegiaoEnum,
     cidade: data.cidade.trim(),
-    religiao,
+    religiao: religiao ?? null,
     religiao_outra: religiaoOutra,
-    escola: stringOrUndefined(data.escola),
+    escola: stringOrNull(data.escola),
     profissao,
     profissao_outra: profissaoOutra,
     segmento_social: segmento,
     segmento_social_outro: segmentoOutro,
-    lideranca,
+    lideranca: lideranca ?? null,
     lideranca_outra: liderancaOutra,
     atendido_instituto: data.atendido_instituto,
     atendido_demandas: data.atendido_demandas,
     participante_atividades: data.participante_atividades,
-    data_instituto: parseDisplayDateToISO(data.data_instituto),
-    data_demandas: parseDisplayDateToISO(data.data_demandas),
-    data_atividades: parseDisplayDateToISO(data.data_atividades),
-    instagram: stringOrUndefined(data.instagram),
-    facebook: stringOrUndefined(data.facebook),
-    tiktok: stringOrUndefined(data.tiktok),
-    observacoes: stringOrUndefined(data.observacoes),
-    interacao: data.interacao
+    instagram: stringOrNull(data.instagram),
+    facebook: stringOrNull(data.facebook),
+    tiktok: stringOrNull(data.tiktok),
+    observacoes: stringOrNull(data.observacoes),
+    interacao: data.interacao,
+    data_instituto: null,
+    data_demandas: null,
+    data_atividades: null
   }
 }
 
@@ -250,7 +283,7 @@ interface UseEleitorFormOptions {
   userToEdit?: Eleitor | null
 }
 
-const DATE_FIELDS = new Set(['data_nascimento', 'data_instituto', 'data_demandas', 'data_atividades'])
+const DATE_FIELDS = new Set(['data_nascimento'])
 
 export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorFormOptions): UseEleitorFormReturn => {
   const [formData, setFormData] = useState<EleitorFormData>(createEmptyFormData())
@@ -345,16 +378,6 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorForm
 
     setFormData(prev => {
       const next = { ...prev, [name]: checked } as EleitorFormData
-
-      if (name === 'atendido_instituto' && !checked) {
-        next.data_instituto = ''
-      }
-      if (name === 'atendido_demandas' && !checked) {
-        next.data_demandas = ''
-      }
-      if (name === 'participante_atividades' && !checked) {
-        next.data_atividades = ''
-      }
 
       return next
     })

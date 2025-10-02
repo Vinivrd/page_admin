@@ -147,6 +147,42 @@ export interface Eleitor {
   updated_at?: string;
 }
 
+export type EleitorUpsertPayload = {
+  nome: string;
+  email: string | null;
+  telefone: string | null;
+  data_nascimento: string | null;
+  cpf: string | null;
+  genero: GeneroEnum;
+  rua: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cep: string | null;
+  regiao: RegiaoEnum;
+  cidade: string;
+  religiao: ReligiaoEnum | null;
+  religiao_outra: string | null;
+  escola: string | null;
+  profissao: ProfissaoEnum;
+  profissao_outra: string | null;
+  segmento_social: SegmentoSocialEnum;
+  segmento_social_outro: string | null;
+  lideranca: LiderancaEnum | null;
+  lideranca_outra: string | null;
+  atendido_instituto: boolean;
+  atendido_demandas: boolean;
+  participante_atividades: boolean;
+  data_instituto: string | null;
+  data_demandas: string | null;
+  data_atividades: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  tiktok: string | null;
+  observacoes: string | null;
+  interacao: boolean;
+}
+
 /**
  * Classe customizada de erro para operações com eleitores
  */
@@ -265,7 +301,7 @@ export async function fetchEleitorById(id: string) {
 /**
  * Adiciona um novo eleitor
  */
-export async function addEleitor(eleitor: Omit<Eleitor, 'id' | 'created_at' | 'updated_at'>) {
+export async function addEleitor(eleitor: EleitorUpsertPayload) {
   try {
     const result = await supabase
       .from('eleitores')
@@ -298,7 +334,7 @@ export async function addEleitor(eleitor: Omit<Eleitor, 'id' | 'created_at' | 'u
 /**
  * Atualiza um eleitor existente
  */
-export async function updateEleitor(id: string, eleitor: Partial<Eleitor>) {
+export async function updateEleitor(id: string, eleitor: Partial<EleitorUpsertPayload>) {
   try {
     if (!id) {
       throw new EleitoresError('ID do eleitor não fornecido para atualização', 'database/invalid-id');
