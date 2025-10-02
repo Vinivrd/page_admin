@@ -58,54 +58,48 @@ data_atividades DATE
 #### 1.2 Criação de Enums
 - [ ] Enum para regiões (11 regiões especificadas)
 - [ ] Enum para religiões (9 opções + "Outra")
-- [ ] Enum para profissões (16 opções + "Outro")
-- [ ] Enum para segmentos sociais (7 opções + "Outro")
-- [ ] Enum para lideranças (17 opções + "Outra")
-
----
-
-### **FASE 2: Atualização dos Tipos TypeScript**
 *Tempo estimado: 1 dia*
 
 #### 2.1 Atualização da Interface Eleitor
-- [ ] Atualizar `src/services/eleitores.service.ts`
-- [ ] Adicionar todos os novos campos
-- [ ] Criar tipos para os enums
-- [ ] Atualizar DTOs de criação e atualização
+- [x] Atualizar `src/services/eleitores.service.ts`
+- [x] Adicionar todos os novos campos
+- [x] Criar tipos para os enums
+- [x] Atualizar DTOs de criação e atualização
 
 #### 2.2 Criação de Tipos Auxiliares
-- [ ] Tipo para filtros expandidos
-- [ ] Tipo para campos de endereço
-- [ ] Tipos para relatórios e exportação
+- [x] Tipo para filtros expandidos
+- [x] Tipo para campos de endereço
+- [x] Tipos para relatórios e exportação
 
 ---
 
+{{ ... }}
 ### **FASE 3: Atualização do Formulário de Cadastro**
 *Tempo estimado: 2-3 dias*
 
 #### 3.1 Reorganização dos Campos de Endereço
-- [ ] Separar campos: rua, número, complemento, bairro, CEP, região
-- [ ] Implementar select para região (obrigatório)
-- [ ] Implementar input text para bairro
+- [x] Separar campos: rua, número, complemento, bairro, CEP, região
+- [x] Implementar select para região (obrigatório)
+- [x] Implementar input text para bairro
 - [ ] Validação de CEP
 - [ ] Integração futura com API de CEP (opcional)
 
 #### 3.2 Novos Campos Obrigatórios
-- [ ] Select de religião com 9 opções + campo "Outra"
-- [ ] Select de profissão com 16 opções + campo "Outro"
-- [ ] Select de segmento social com 7 opções + campo "Outro"
+- [x] Select de religião com 9 opções + campo "Outra"
+- [x] Select de profissão com 16 opções + campo "Outro"
+- [x] Select de segmento social com 7 opções + campo "Outro"
 
 #### 3.3 Campos de Controle (Checkboxes)
-- [ ] Checkbox "Atendido pelo Instituto"
-- [ ] Checkbox "Atendido por Demandas do Mandato"
-- [ ] Checkbox "Participa de Atividades do Mandato"
-- [ ] Select para "Liderança" (17 opções + "Outra")
+- [x] Checkbox "Atendido pelo Instituto"
+- [x] Checkbox "Atendido por Demandas do Mandato"
+- [x] Checkbox "Participa de Atividades do Mandato"
+- [x] Select para "Liderança" (17 opções + "Outra")
 
 #### 3.4 Validações
-- [ ] Região obrigatória
-- [ ] Profissão obrigatória
-- [ ] Segmento social obrigatório
-- [ ] Validação de campos "Outro/Outra" quando selecionados
+- [x] Região obrigatória
+- [x] Profissão obrigatória
+- [x] Segmento social obrigatório
+- [x] Validação de campos "Outro/Outra" quando selecionados
 
 ---
 
@@ -113,22 +107,22 @@ data_atividades DATE
 *Tempo estimado: 2 dias*
 
 #### 4.1 Novos Filtros de Busca
-- [ ] Filtro por região (múltipla seleção)
+- [x] Filtro por região (múltipla seleção)
 - [ ] Filtro por bairro (texto livre)
-- [ ] Filtro por religião (múltipla seleção)
-- [ ] Filtro por profissão (múltipla seleção)
-- [ ] Filtro por segmento social (múltipla seleção)
+- [x] Filtro por religião (múltipla seleção)
+- [x] Filtro por profissão (múltipla seleção)
+- [x] Filtro por segmento social (múltipla seleção)
 
 #### 4.2 Filtros de Controle
-- [ ] Filtro "Atendidos pelo Instituto" (Sim/Não/Todos)
-- [ ] Filtro "Atendidos por Demandas" (Sim/Não/Todos)
-- [ ] Filtro "Participantes de Atividades" (Sim/Não/Todos)
-- [ ] Filtro por liderança (select)
+- [x] Filtro "Atendidos pelo Instituto" (Sim/Não/Todos)
+- [x] Filtro "Atendidos por Demandas" (Sim/Não/Todos)
+- [x] Filtro "Participantes de Atividades" (Sim/Não/Todos)
+- [x] Filtro por liderança (select)
 
 #### 4.3 Filtros Combinados
-- [ ] Filtros aplicados simultaneamente
+- [x] Filtros aplicados simultaneamente
 - [ ] Contador de registros filtrados
-- [ ] Botão "Limpar filtros"
+- [x] Botão "Limpar filtros"
 
 ---
 
@@ -136,8 +130,8 @@ data_atividades DATE
 *Tempo estimado: 2 dias*
 
 #### 5.1 Atualização da Tabela Principal
-- [ ] Ajustar colunas exibidas conforme prioridade
-- [ ] Adicionar indicadores visuais para status de atendimento
+- [x] Ajustar colunas exibidas conforme prioridade
+- [x] Adicionar indicadores visuais para status de atendimento
 - [ ] Melhorar responsividade da tabela
 - [ ] Implementar ordenação nas novas colunas
 
