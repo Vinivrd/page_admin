@@ -110,9 +110,41 @@ const createEmptyFormData = (): EleitorFormData => ({
   interacao: false
 });
 
-const toDateInputValue = (value?: string | null) => {
+const formatDateToDisplay = (value?: string | null) => {
   if (!value) return '';
-  return value.includes('T') ? value.split('T')[0] : value;
+  const iso = value.includes('T') ? value.split('T')[0] : value;
+  const [year, month, day] = iso.split('-');
+  if (!year || !month || !day) return '';
+  return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+};
+
+const maskDisplayDate = (raw: string) => {
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+};
+
+const parseDisplayDateToISO = (displayValue: string) => {
+  const digits = displayValue.replace(/\D/g, '');
+  if (digits.length !== 8) return undefined;
+
+  const day = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const year = digits.slice(4, 8);
+  const iso = `${year}-${month}-${day}`;
+  const date = new Date(`${iso}T00:00:00`);
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getUTCFullYear().toString() !== year ||
+    String(date.getUTCMonth() + 1).padStart(2, '0') !== month ||
+    String(date.getUTCDate()).padStart(2, '0') !== day
+  ) {
+    return undefined;
+  }
+
+  return iso;
 };
 
 const trimOrEmpty = (value?: string | null) => value?.trim() ?? '';
@@ -126,7 +158,7 @@ const mapEleitorToFormData = (eleitor: Eleitor): EleitorFormData => ({
   nome: trimOrEmpty(eleitor.nome),
   email: trimOrEmpty(eleitor.email),
   telefone: trimOrEmpty(eleitor.telefone),
-  data_nascimento: toDateInputValue(eleitor.data_nascimento),
+  data_nascimento: formatDateToDisplay(eleitor.data_nascimento),
   cpf: trimOrEmpty(eleitor.cpf),
   genero: eleitor.genero ?? '',
   rua: trimOrEmpty(eleitor.rua),
@@ -148,9 +180,9 @@ const mapEleitorToFormData = (eleitor: Eleitor): EleitorFormData => ({
   atendido_instituto: Boolean(eleitor.atendido_instituto),
   atendido_demandas: Boolean(eleitor.atendido_demandas),
   participante_atividades: Boolean(eleitor.participante_atividades),
-  data_instituto: toDateInputValue(eleitor.data_instituto),
-  data_demandas: toDateInputValue(eleitor.data_demandas),
-  data_atividades: toDateInputValue(eleitor.data_atividades),
+  data_instituto: formatDateToDisplay(eleitor.data_instituto),
+  data_demandas: formatDateToDisplay(eleitor.data_demandas),
+  data_atividades: formatDateToDisplay(eleitor.data_atividades),
   instagram: trimOrEmpty(eleitor.instagram),
   facebook: trimOrEmpty(eleitor.facebook),
   tiktok: trimOrEmpty(eleitor.tiktok),
@@ -170,11 +202,13 @@ const buildEleitorPayload = (
   const segmentoOutro = segmento === SegmentoSocialEnum.OUTRO ? stringOrUndefined(data.segmento_social_outro) : undefined;
   const liderancaOutra = lideranca === LiderancaEnum.OUTRA ? stringOrUndefined(data.lideranca_outra) : undefined;
 
+  const dataNascimentoISO = parseDisplayDateToISO(data.data_nascimento);
+
   return {
     nome: data.nome.trim(),
     email: stringOrUndefined(data.email),
     telefone: stringOrUndefined(data.telefone),
-    data_nascimento: stringOrUndefined(data.data_nascimento),
+    data_nascimento: dataNascimentoISO,
     cpf: stringOrUndefined(data.cpf),
     genero: data.genero as GeneroEnum,
     rua: stringOrUndefined(data.rua),
@@ -196,9 +230,9 @@ const buildEleitorPayload = (
     atendido_instituto: data.atendido_instituto,
     atendido_demandas: data.atendido_demandas,
     participante_atividades: data.participante_atividades,
-    data_instituto: stringOrUndefined(data.data_instituto),
-    data_demandas: stringOrUndefined(data.data_demandas),
-    data_atividades: stringOrUndefined(data.data_atividades),
+    data_instituto: parseDisplayDateToISO(data.data_instituto),
+    data_demandas: parseDisplayDateToISO(data.data_demandas),
+    data_atividades: parseDisplayDateToISO(data.data_atividades),
     instagram: stringOrUndefined(data.instagram),
     facebook: stringOrUndefined(data.facebook),
     tiktok: stringOrUndefined(data.tiktok),
@@ -239,6 +273,16 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+
+    if (name === 'data_nascimento') {
+      const masked = maskDisplayDate(value);
+      setFormData(prev => ({
+        ...prev,
+        data_nascimento: masked
+      }));
+      return;
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -359,6 +403,10 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
 
     if (formData.lideranca === LiderancaEnum.OUTRA && !formData.lideranca_outra.trim()) {
       errors.push('Informe a liderança quando "Outra" for selecionada.');
+    }
+
+    if (formData.data_nascimento.trim() && !parseDisplayDateToISO(formData.data_nascimento)) {
+      errors.push('Informe a data de nascimento no formato DD/MM/AAAA.');
     }
 
     if (errors.length > 0) {
@@ -564,6 +612,7 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
                 type="date"
                 id="data_nascimento"
                 name="data_nascimento"
+                lang="pt-BR"
                 value={formData.data_nascimento}
                 onChange={handleInputChange}
               />
