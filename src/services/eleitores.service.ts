@@ -4,86 +4,98 @@ import { supabase } from './supabase';
 // ENUMS - Correspondem aos enums do banco de dados
 // =====================================================
 
-export enum RegiaoEnum {
-  CENTRO = 'Centro',
-  CONTINENTAIS = 'Continentais',
-  VILA_GALVAO = 'Vila Galvão',
-  BONSUCESSO = 'Bonsucesso',
-  COCAIA = 'Cocaia',
-  PIMENTAS = 'Pimentas',
-  CUMBICA = 'Cumbica',
-  CUMBICA_AEROPORTO = 'Cumbica aeroporto',
-  SAO_JOAO = 'São João',
-  TABOAO = 'Taboão',
-  TRANQUILIDADE = 'Tranquilidade'
-}
+export const RegiaoEnum = {
+  CENTRO: 'Centro',
+  CONTINENTAIS: 'Continentais',
+  VILA_GALVAO: 'Vila Galvão',
+  BONSUCESSO: 'Bonsucesso',
+  COCAIA: 'Cocaia',
+  PIMENTAS: 'Pimentas',
+  CUMBICA: 'Cumbica',
+  CUMBICA_AEROPORTO: 'Cumbica aeroporto',
+  SAO_JOAO: 'São João',
+  TABOAO: 'Taboão',
+  TRANQUILIDADE: 'Tranquilidade'
+} as const;
 
-export enum ReligiaoEnum {
-  CATOLICO = 'Católico',
-  EVANGELICO = 'Evangélico/Protestante',
-  ESPIRITA = 'Espírita',
-  UMBANDISTA = 'Umbandista',
-  CANDOMBLECISTA = 'Candomblecista',
-  BUDISTA = 'Budista',
-  ISLAMICO = 'Islâmico',
-  JUDEU = 'Judeu',
-  OUTRA = 'Outra'
-}
+export type RegiaoEnum = typeof RegiaoEnum[keyof typeof RegiaoEnum];
 
-export enum ProfissaoEnum {
-  DONA_DE_CASA = 'Dona de casa',
-  APOSENTADO = 'Aposentado',
-  AUTONOMO = 'Autônomo',
-  COMERCIANTE = 'Comerciante',
-  COMERCIARIO = 'Comerciário',
-  BANCARIO = 'Bancário',
-  PROFESSOR = 'Professor',
-  FUNCIONARIO_PUBLICO = 'Funcionário Público',
-  MEDICO = 'Médico',
-  AGENTE_SAUDE = 'Agente de saúde',
-  ENFERMEIRO = 'Enfermeiro',
-  ADVOGADO = 'Advogado',
-  ENGENHEIRO = 'Engenheiro',
-  TECNICO_GERAL = 'Técnico em geral',
-  TRABALHADOR_INFORMATICA = 'Trabalhador de Informática',
-  OUTRO = 'Outro'
-}
+export const ReligiaoEnum = {
+  CATOLICO: 'Católico',
+  EVANGELICO: 'Evangélico/Protestante',
+  ESPIRITA: 'Espírita',
+  UMBANDISTA: 'Umbandista',
+  CANDOMBLECISTA: 'Candomblecista',
+  BUDISTA: 'Budista',
+  ISLAMICO: 'Islâmico',
+  JUDEU: 'Judeu',
+  OUTRA: 'Outra'
+} as const;
 
-export enum SegmentoSocialEnum {
-  SAUDE = 'Saúde',
-  EDUCACAO = 'Educação',
-  MORADIA = 'Moradia',
-  TRANSPORTE = 'Transporte',
-  ASSISTENCIA_SOCIAL = 'Assistência Social',
-  SEGURANCA = 'Segurança',
-  OUTRO = 'Outro'
-}
+export type ReligiaoEnum = typeof ReligiaoEnum[keyof typeof ReligiaoEnum];
 
-export enum LiderancaEnum {
-  ARNALDO_SOUZA = 'Arnaldo Souza',
-  LUIZAO_SOUZA = 'Luizão Souza',
-  EDERSON = 'Ederson',
-  LUIZ_FABIO = 'Luiz Fábio',
-  DR_MARCELO = 'Dr Marcelo',
-  PROF_RENATO = 'Prof Renato',
-  SANDRAO = 'Sandrão',
-  DR_SEVERINO = 'Dr Severino',
-  JOSEFA = 'Josefa',
-  ZE_DINIZ = 'Zé Diniz',
-  ROSILDA = 'Rosilda',
-  MARKS = 'Marks',
-  ULISSES = 'Ulisses',
-  GILMAR = 'Gilmar',
-  CORREIOS = 'Correios',
-  APOSENTADOS = 'Aposentados',
-  OUTRA = 'Outra'
-}
+export const ProfissaoEnum = {
+  DONA_DE_CASA: 'Dona de casa',
+  APOSENTADO: 'Aposentado',
+  AUTONOMO: 'Autônomo',
+  COMERCIANTE: 'Comerciante',
+  COMERCIARIO: 'Comerciário',
+  BANCARIO: 'Bancário',
+  PROFESSOR: 'Professor',
+  FUNCIONARIO_PUBLICO: 'Funcionário Público',
+  MEDICO: 'Médico',
+  AGENTE_SAUDE: 'Agente de saúde',
+  ENFERMEIRO: 'Enfermeiro',
+  ADVOGADO: 'Advogado',
+  ENGENHEIRO: 'Engenheiro',
+  TECNICO_GERAL: 'Técnico em geral',
+  TRABALHADOR_INFORMATICA: 'Trabalhador de Informática',
+  OUTRO: 'Outro'
+} as const;
 
-export enum GeneroEnum {
-  MASCULINO = 'MASCULINO',
-  FEMININO = 'FEMININO',
-  OUTROS = 'OUTROS'
-}
+export type ProfissaoEnum = typeof ProfissaoEnum[keyof typeof ProfissaoEnum];
+
+export const SegmentoSocialEnum = {
+  SAUDE: 'Saúde',
+  EDUCACAO: 'Educação',
+  MORADIA: 'Moradia',
+  TRANSPORTE: 'Transporte',
+  ASSISTENCIA_SOCIAL: 'Assistência Social',
+  SEGURANCA: 'Segurança',
+  OUTRO: 'Outro'
+} as const;
+
+export type SegmentoSocialEnum = typeof SegmentoSocialEnum[keyof typeof SegmentoSocialEnum];
+
+export const LiderancaEnum = {
+  ARNALDO_SOUZA: 'Arnaldo Souza',
+  LUIZAO_SOUZA: 'Luizão Souza',
+  EDERSON: 'Ederson',
+  LUIZ_FABIO: 'Luiz Fábio',
+  DR_MARCELO: 'Dr Marcelo',
+  PROF_RENATO: 'Prof Renato',
+  SANDRAO: 'Sandrão',
+  DR_SEVERINO: 'Dr Severino',
+  JOSEFA: 'Josefa',
+  ZE_DINIZ: 'Zé Diniz',
+  ROSILDA: 'Rosilda',
+  MARKS: 'Marks',
+  ULISSES: 'Ulisses',
+  GILMAR: 'Gilmar',
+  CORREIOS: 'Correios',
+  APOSENTADOS: 'Aposentados',
+  OUTRA: 'Outra'
+} as const;
+
+export type LiderancaEnum = typeof LiderancaEnum[keyof typeof LiderancaEnum];
+
+export const GeneroEnum = {
+  MASCULINO: 'MASCULINO',
+  FEMININO: 'FEMININO',
+  OUTROS: 'OUTROS'
+} as const;
+
+export type GeneroEnum = typeof GeneroEnum[keyof typeof GeneroEnum];
 
 // =====================================================
 // INTERFACE PRINCIPAL

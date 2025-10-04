@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Filter, Download } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import BooleanFilter from '../components/filtros/BooleanFilter';
 import ListFilter from '../components/filtros/ListFilter';
 import SearchFilter from '../components/filtros/SearchFilter';
@@ -319,11 +319,24 @@ const DashboardPage = () => {
                       bairro: e.bairro,
                       telefone: e.telefone,
                       instagram: e.instagram,
+                      facebook: e.facebook,
                       tiktok: e.tiktok,
                       religiao: e.religiao,
+                      religiao_outra: e.religiao_outra,
                       observacoes: e.observacoes,
                       profissao: e.profissao,
+                      profissao_outra: e.profissao_outra,
+                      segmento_social: e.segmento_social,
+                      segmento_social_outro: e.segmento_social_outro,
+                      lideranca: e.lideranca,
+                      lideranca_outra: e.lideranca_outra,
                       escola: e.escola,
+                      atendido_instituto: e.atendido_instituto,
+                      atendido_demandas: e.atendido_demandas,
+                      participante_atividades: e.participante_atividades,
+                      data_instituto: e.data_instituto,
+                      data_demandas: e.data_demandas,
+                      data_atividades: e.data_atividades,
                       interacao: e.interacao,
                       created_at: e.created_at || '',
                       data_nascimento: e.data_nascimento || ''
