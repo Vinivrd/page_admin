@@ -4,7 +4,7 @@ import { Edit, Trash2 } from 'lucide-react';
 import './UserRow.scss';
 import AddUserModal from './add-user/AddUserModal';
 import { toast } from 'react-toastify';
-import { deleteEleitor } from '../services/eleitores.service';
+import { deleteEleitor, type Eleitor } from '../services/eleitores.service';
 
 // Movendo a interface User para um arquivo separado (simulado aqui)
 export interface User {
@@ -44,6 +44,7 @@ export interface User {
 interface UserRowProps {
   user: User;
   onDeleted?: (id: string) => void;
+  onUpdated?: (user: Partial<User> & { id: string }) => void;
 }
 
 // Funções de formatação movidas para fora do componente
@@ -78,7 +79,7 @@ const formatEnumWithOther = (primary?: string, other?: string): string => {
 };
 
 // Componente principal com memo para evitar renderizações desnecessárias
-const UserRow: FC<UserRowProps> = memo(({ user, onDeleted }) => {
+const UserRow: FC<UserRowProps> = memo(({ user, onDeleted, onUpdated }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleEditClick = () => {
@@ -176,8 +177,14 @@ const UserRow: FC<UserRowProps> = memo(({ user, onDeleted }) => {
         <AddUserModal
           isOpen={isEditModalOpen}
           onClose={handleCloseEditModal}
-          userToEdit={user}
+          userToEdit={user as unknown as Eleitor}
           isEditing={true}
+          onSuccess={(updated?: Eleitor) => {
+            handleCloseEditModal();
+            if (updated) {
+              onUpdated?.({ id: user.id, ...updated });
+            }
+          }}
         />
       )}
     </>

@@ -13,16 +13,17 @@ import {
 } from '../../services/enums.utils'
 import ErrorMessage from '../ErrorMessage'
 import { useEleitorForm } from './useEleitorForm'
-import type { UseEleitorFormReturn } from './useEleitorForm'
+import type { UseEleitorFormReturn, EleitorFormSubmitResult } from './useEleitorForm'
 
 interface AddUserModalProps {
   isOpen: boolean
   onClose: () => void
   userToEdit?: Eleitor | null
   isEditing?: boolean
+  onSuccess?: (updated: EleitorFormSubmitResult) => void
 }
 
-const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUserModalProps) => {
+const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false, onSuccess }: AddUserModalProps) => {
   const [isClosing, setIsClosing] = useState(false)
   const closeTimeoutRef = useRef<number | null>(null)
 
@@ -38,7 +39,7 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false }: AddUse
     dismissError,
     clearSuccessMessage,
     resetForm
-  } = useEleitorForm({ isOpen, isEditing, userToEdit })
+  } = useEleitorForm({ isOpen, isEditing, userToEdit, onSuccess })
 
   const handleCloseWithAnimation = useCallback(() => {
     setIsClosing(true)

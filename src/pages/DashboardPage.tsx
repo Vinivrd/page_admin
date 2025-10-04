@@ -9,6 +9,7 @@ import ErrorMessage from '../components/ErrorMessage';
 import './DashboardPage.scss';
 import { fetchEleitoresPage } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
+import { REGIOES_OPTIONS, RELIGIOES_OPTIONS } from '../services/enums.utils';
 // import { toast } from 'react-toastify';
 
 const DashboardPage = () => {
@@ -121,12 +122,8 @@ const DashboardPage = () => {
           <ListFilter
             label="Região"
             options={[
-              { value: '', label: 'Todas as regiões' },
-              { value: 'Norte', label: 'Norte' },
-              { value: 'Sul', label: 'Sul' },
-              { value: 'Leste', label: 'Leste' },
-              { value: 'Oeste', label: 'Oeste' },
-              { value: 'Centro', label: 'Centro' },
+              { value: '', label: 'Selecione' },
+              ...REGIOES_OPTIONS
             ]}
             value={filters.regiao}
             onChange={val => handleFilterChange('regiao', val)}
@@ -146,17 +143,12 @@ const DashboardPage = () => {
           <ListFilter
             label="Religião"
             options={[
-              { value: '', label: 'Todas as religiões' },
-              { value: 'Cristianismo', label: 'Cristianismo' },
-              { value: 'Islamismo', label: 'Islamismo' },
-              { value: 'Budismo', label: 'Budismo' },
-              { value: 'Hinduismo', label: 'Hinduismo' },
-              { value: 'Judaísmo', label: 'Judaísmo' },
-              { value: 'Outros', label: 'Outros' },
+              { value: '', label: 'Selecione' },
+              ...RELIGIOES_OPTIONS
             ]}
             value={filters.religiao}
             onChange={val => handleFilterChange('religiao', val)}
-            />
+          />
           <SearchFilter
             label="Buscar"
             placeholder="Nome, email ou CPF"

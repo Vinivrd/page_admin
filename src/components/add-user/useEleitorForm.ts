@@ -56,6 +56,8 @@ export type EleitorFormData = {
   interacao: boolean
 }
 
+export type EleitorFormSubmitResult = EleitorUpsertPayload & { id: string }
+
 export interface FormFeedbackError {
   message: string
   details?: string
@@ -281,11 +283,12 @@ interface UseEleitorFormOptions {
   isOpen: boolean
   isEditing: boolean
   userToEdit?: Eleitor | null
+  onSuccess?: (data: EleitorFormSubmitResult) => void
 }
 
 const DATE_FIELDS = new Set(['data_nascimento'])
 
-export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorFormOptions): UseEleitorFormReturn => {
+export const useEleitorForm = ({ isOpen, isEditing, userToEdit, onSuccess }: UseEleitorFormOptions): UseEleitorFormReturn => {
   const [formData, setFormData] = useState<EleitorFormData>(createEmptyFormData())
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<FormFeedbackError | null>(null)
@@ -461,6 +464,7 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorForm
 
       try {
         const payload = buildEleitorPayload(formData)
+        let persistedRecord: Eleitor | null = null
 
         if (isEditing) {
           if (!userToEdit?.id) {
@@ -481,6 +485,7 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorForm
 
           const result = await updateEleitor(userToEdit.id, payload)
           if (result.error) throw result.error
+          persistedRecord = Array.isArray(result.data) && result.data.length > 0 ? (result.data[0] as Eleitor) : null
 
           setSuccessMessage('Eleitor atualizado com sucesso!')
           toast.success('Eleitor atualizado com sucesso!', {
@@ -494,6 +499,7 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorForm
         } else {
           const result = await addEleitor(payload)
           if (result.error) throw result.error
+          persistedRecord = Array.isArray(result.data) && result.data.length > 0 ? (result.data[0] as Eleitor) : null
 
           setSuccessMessage('Eleitor cadastrado com sucesso!')
           toast.success('Eleitor cadastrado com sucesso!', {
@@ -504,6 +510,17 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorForm
             pauseOnHover: true,
             draggable: true
           })
+        }
+
+        if (onSuccess) {
+          const persistedId = persistedRecord?.id ?? userToEdit?.id ?? ''
+          if (persistedId) {
+            const submitResult: EleitorFormSubmitResult = {
+              id: persistedId,
+              ...payload
+            }
+            onSuccess(submitResult)
+          }
         }
 
         resetForm({ keepFeedback: true })
@@ -562,7 +579,7 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit }: UseEleitorForm
         setIsSubmitting(false)
       }
     },
-    [formData, isEditing, resetForm, userToEdit, validateForm]
+    [formData, isEditing, onSuccess, resetForm, userToEdit, validateForm]
   )
 
   const dismissError = useCallback(() => setError(null), [])
