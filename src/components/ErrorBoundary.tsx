@@ -23,7 +23,10 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    // Log apenas em desenvolvimento
+    if (import.meta.env.DEV) {
+      console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    }
     // Aqui você poderia enviar o erro para um serviço de monitoramento como Sentry
   }
 

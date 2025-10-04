@@ -78,7 +78,10 @@ export default function LoginPage() {
       }
       navigate('/dashboard');
     } catch (err) {
-      console.error('Erro de login:', err);
+      // Log apenas em desenvolvimento
+      if (import.meta.env.DEV) {
+        console.error('Erro de login:', err);
+      }
       
       if (err instanceof AuthError) {
         // Mensagens de erro mais amigáveis baseadas no código

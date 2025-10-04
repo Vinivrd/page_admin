@@ -192,14 +192,7 @@ const DashboardPage = () => {
             >
               Limpar filtros
             </button>
-            <button 
-              type="button" 
-              className="btn-secondary btn-with-icon" 
-              aria-label="Exportar dados"
-            >
-              <Download size={16} />
-              <span>Exportar</span>
-            </button>
+
           </div>
         </div>
       </div>

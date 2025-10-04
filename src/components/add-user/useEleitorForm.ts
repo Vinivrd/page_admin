@@ -526,7 +526,10 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit, onSuccess }: Use
         resetForm({ keepFeedback: true })
         return true
       } catch (err) {
-        console.error(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor:`, err)
+        // Log apenas em desenvolvimento
+        if (import.meta.env.DEV) {
+          console.error(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor:`, err)
+        }
 
         if (err instanceof EleitoresError) {
           let errorMessage = `Erro ao ${isEditing ? 'atualizar' : 'adicionar'} eleitor`
