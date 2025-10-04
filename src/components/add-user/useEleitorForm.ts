@@ -230,10 +230,10 @@ const mapEleitorToFormData = (eleitor: Eleitor): EleitorFormData => ({
   interacao: Boolean(eleitor.interacao)
 })
 
-const buildEleitorPayload = (data: EleitorFormData): EleitorUpsertPayload => {
+const buildEleitorPayload = (data: EleitorFormData, isEditing: boolean = false): any => {
   const religiao = data.religiao ? (data.religiao as ReligiaoEnum) : undefined
-  const profissao = data.profissao as ProfissaoEnum
-  const segmento = data.segmento_social as SegmentoSocialEnum
+  const profissao = data.profissao ? (data.profissao as ProfissaoEnum) : undefined
+  const segmento = data.segmento_social ? (data.segmento_social as SegmentoSocialEnum) : undefined
   const lideranca = data.lideranca ? (data.lideranca as LiderancaEnum) : undefined
   const religiaoOutra = religiao === ReligiaoEnum.OUTRA ? stringOrNull(data.religiao_outra) : null
   const profissaoOutra = profissao === ProfissaoEnum.OUTRO ? stringOrNull(data.profissao_outra) : null
@@ -242,26 +242,21 @@ const buildEleitorPayload = (data: EleitorFormData): EleitorUpsertPayload => {
 
   const dataNascimentoISO = parseDisplayDateToISO(data.data_nascimento)
 
-  return {
+  const payload: any = {
     nome: data.nome.trim(),
     email: stringOrNull(data.email),
     telefone: stringOrNull(data.telefone),
     data_nascimento: dataNascimentoISO ?? null,
     cpf: stringOrNull(data.cpf),
-    genero: data.genero as GeneroEnum,
     rua: stringOrNull(data.rua),
     numero: stringOrNull(data.numero),
     complemento: stringOrNull(data.complemento),
     bairro: stringOrNull(data.bairro),
     cep: stringOrNull(data.cep),
-    regiao: data.regiao as RegiaoEnum,
-    cidade: data.cidade.trim(),
     religiao: religiao ?? null,
     religiao_outra: religiaoOutra,
     escola: stringOrNull(data.escola),
-    profissao,
     profissao_outra: profissaoOutra,
-    segmento_social: segmento,
     segmento_social_outro: segmentoOutro,
     lideranca: lideranca ?? null,
     lideranca_outra: liderancaOutra,
@@ -277,6 +272,40 @@ const buildEleitorPayload = (data: EleitorFormData): EleitorUpsertPayload => {
     data_demandas: null,
     data_atividades: null
   }
+
+  // Campos enum obrigatórios - só incluir se preenchidos
+  if (data.genero && data.genero.trim()) {
+    payload.genero = data.genero as GeneroEnum
+  } else if (!isEditing) {
+    // Para criação, usar valor padrão se vazio
+    payload.genero = data.genero as GeneroEnum
+  }
+  
+  if (data.regiao && data.regiao.trim()) {
+    payload.regiao = data.regiao as RegiaoEnum
+  } else if (!isEditing) {
+    payload.regiao = data.regiao as RegiaoEnum
+  }
+  
+  if (data.cidade && data.cidade.trim()) {
+    payload.cidade = data.cidade.trim()
+  } else if (!isEditing) {
+    payload.cidade = data.cidade.trim()
+  }
+  
+  if (profissao) {
+    payload.profissao = profissao
+  } else if (!isEditing) {
+    payload.profissao = data.profissao as ProfissaoEnum
+  }
+  
+  if (segmento) {
+    payload.segmento_social = segmento
+  } else if (!isEditing) {
+    payload.segmento_social = data.segmento_social as SegmentoSocialEnum
+  }
+
+  return payload
 }
 
 interface UseEleitorFormOptions {
@@ -387,6 +416,13 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit, onSuccess }: Use
   }, [])
 
   const validateForm = useCallback(() => {
+    // Se estiver editando, pular todas as validações
+    if (isEditing) {
+      setError(null)
+      return true
+    }
+
+    // Validações apenas para criação
     const errors: string[] = []
 
     if (!formData.nome.trim()) {
@@ -451,7 +487,7 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit, onSuccess }: Use
 
     setError(null)
     return true
-  }, [formData])
+  }, [formData, isEditing])
 
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
@@ -463,7 +499,7 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit, onSuccess }: Use
       setError(null)
 
       try {
-        const payload = buildEleitorPayload(formData)
+        const payload = buildEleitorPayload(formData, isEditing)
         let persistedRecord: Eleitor | null = null
 
         if (isEditing) {
@@ -515,10 +551,50 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit, onSuccess }: Use
         if (onSuccess) {
           const persistedId = persistedRecord?.id ?? userToEdit?.id ?? ''
           if (persistedId) {
-            const submitResult: EleitorFormSubmitResult = {
-              id: persistedId,
-              ...payload
-            }
+            // Para edição, usar os dados originais + payload para garantir todos os campos
+            const submitResult: EleitorFormSubmitResult = isEditing && userToEdit 
+              ? {
+                  id: persistedId,
+                  nome: payload.nome || userToEdit.nome,
+                  email: payload.email !== undefined ? payload.email : userToEdit.email,
+                  telefone: payload.telefone !== undefined ? payload.telefone : userToEdit.telefone,
+                  data_nascimento: payload.data_nascimento !== undefined ? payload.data_nascimento : userToEdit.data_nascimento,
+                  cpf: payload.cpf !== undefined ? payload.cpf : userToEdit.cpf,
+                  genero: payload.genero || userToEdit.genero,
+                  rua: payload.rua !== undefined ? payload.rua : userToEdit.rua,
+                  numero: payload.numero !== undefined ? payload.numero : userToEdit.numero,
+                  complemento: payload.complemento !== undefined ? payload.complemento : userToEdit.complemento,
+                  bairro: payload.bairro !== undefined ? payload.bairro : userToEdit.bairro,
+                  cep: payload.cep !== undefined ? payload.cep : userToEdit.cep,
+                  regiao: payload.regiao || userToEdit.regiao,
+                  cidade: payload.cidade || userToEdit.cidade,
+                  religiao: payload.religiao !== undefined ? payload.religiao : userToEdit.religiao,
+                  religiao_outra: payload.religiao_outra !== undefined ? payload.religiao_outra : userToEdit.religiao_outra,
+                  escola: payload.escola !== undefined ? payload.escola : userToEdit.escola,
+                  profissao: payload.profissao || userToEdit.profissao,
+                  profissao_outra: payload.profissao_outra !== undefined ? payload.profissao_outra : userToEdit.profissao_outra,
+                  segmento_social: payload.segmento_social || userToEdit.segmento_social,
+                  segmento_social_outro: payload.segmento_social_outro !== undefined ? payload.segmento_social_outro : userToEdit.segmento_social_outro,
+                  lideranca: payload.lideranca !== undefined ? payload.lideranca : userToEdit.lideranca,
+                  lideranca_outra: payload.lideranca_outra !== undefined ? payload.lideranca_outra : userToEdit.lideranca_outra,
+                  atendido_instituto: payload.atendido_instituto !== undefined ? payload.atendido_instituto : userToEdit.atendido_instituto,
+                  atendido_demandas: payload.atendido_demandas !== undefined ? payload.atendido_demandas : userToEdit.atendido_demandas,
+                  participante_atividades: payload.participante_atividades !== undefined ? payload.participante_atividades : userToEdit.participante_atividades,
+                  data_instituto: payload.data_instituto !== undefined ? payload.data_instituto : userToEdit.data_instituto,
+                  data_demandas: payload.data_demandas !== undefined ? payload.data_demandas : userToEdit.data_demandas,
+                  data_atividades: payload.data_atividades !== undefined ? payload.data_atividades : userToEdit.data_atividades,
+                  instagram: payload.instagram !== undefined ? payload.instagram : userToEdit.instagram,
+                  facebook: payload.facebook !== undefined ? payload.facebook : userToEdit.facebook,
+                  tiktok: payload.tiktok !== undefined ? payload.tiktok : userToEdit.tiktok,
+                  observacoes: payload.observacoes !== undefined ? payload.observacoes : userToEdit.observacoes,
+                  interacao: payload.interacao !== undefined ? payload.interacao : userToEdit.interacao
+                }
+              : {
+                  id: persistedId,
+                  ...payload
+                }
+            
+            console.log('Chamando onSuccess com:', submitResult)
             onSuccess(submitResult)
           }
         }

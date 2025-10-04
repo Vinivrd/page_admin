@@ -71,6 +71,19 @@ const DashboardPage = () => {
     setEleitores(prev => prev.filter(e => e.id !== id));
   };
 
+  const handleEleitorUpdated = (updatedUser: any) => {
+    console.log('DashboardPage handleEleitorUpdated chamado com:', updatedUser);
+    setEleitores(prev => {
+      const updated = prev.map(eleitor => 
+        eleitor.id === updatedUser.id 
+          ? { ...eleitor, ...(updatedUser as any), updated_at: new Date().toISOString() }
+          : eleitor
+      );
+      console.log('Lista DashboardPage atualizada:', updated);
+      return updated;
+    });
+  };
+
   const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
@@ -295,7 +308,7 @@ const DashboardPage = () => {
               <tbody>
                 {eleitores.length > 0 ? (
                   eleitores.map(e => (
-                    <UserRow key={e.id} onDeleted={handleEleitorDeleted} user={{
+                    <UserRow key={e.id} onDeleted={handleEleitorDeleted} onUpdated={handleEleitorUpdated} user={{
                       id: e.id || '',
                       nome: e.nome,
                       email: e.email,

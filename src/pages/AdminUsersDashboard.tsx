@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import BooleanFilter from '../components/filtros/BooleanFilter';
 import UserRow from '../components/UserRow';
+import type { User } from '../components/UserRow';
 import '../styles/dashboard.scss';
 import { fetchEleitores } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
@@ -251,6 +252,23 @@ const AdminUsersDashboard = () => {
     setFilters(initialFilters);
     setCurrentPage(1);
     setError(null);
+  };
+
+  const handleUserUpdated = (updatedUser: Partial<User> & { id: string }) => {
+    console.log('AdminUsersDashboard handleUserUpdated chamado com:', updatedUser);
+    setEleitores(prev => {
+      const updated = prev.map(eleitor => 
+        eleitor.id === updatedUser.id 
+          ? { ...eleitor, ...(updatedUser as any), updated_at: new Date().toISOString() } as Eleitor
+          : eleitor
+      );
+      console.log('Lista atualizada:', updated);
+      return updated;
+    });
+  };
+
+  const handleUserDeleted = (deletedUserId: string) => {
+    setEleitores(prev => prev.filter(eleitor => eleitor.id !== deletedUserId));
   };
 
   const statsCards = useMemo(() => {
@@ -537,6 +555,8 @@ const AdminUsersDashboard = () => {
                     created_at: e.created_at || '',
                     data_nascimento: e.data_nascimento || ''
                   }}
+                  onUpdated={handleUserUpdated}
+                  onDeleted={handleUserDeleted}
                 />
               ))
             )}

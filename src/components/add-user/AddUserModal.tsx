@@ -98,6 +98,7 @@ const AddUserModal = ({ isOpen, onClose, userToEdit, isEditing = false, onSucces
             onInputChange={handleInputChange}
             onSelectChange={handleSelectChange}
             onCheckboxChange={handleCheckboxChange}
+            isEditing={isEditing}
           />
 
           <div className="form-actions">
@@ -133,13 +134,14 @@ interface EleitorFormGridProps {
   onInputChange: UseEleitorFormReturn['handleInputChange']
   onSelectChange: UseEleitorFormReturn['handleSelectChange']
   onCheckboxChange: UseEleitorFormReturn['handleCheckboxChange']
+  isEditing?: boolean
 }
 
-const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxChange }: EleitorFormGridProps) => (
+const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxChange, isEditing = false }: EleitorFormGridProps) => (
   <div className="form-grid">
     <div className="form-group">
-      <label htmlFor="nome">Nome*</label>
-      <input type="text" id="nome" name="nome" value={formData.nome} onChange={onInputChange} required />
+      <label htmlFor="nome">{isEditing ? 'Nome' : 'Nome*'}</label>
+      <input type="text" id="nome" name="nome" value={formData.nome} onChange={onInputChange} required={!isEditing} />
     </div>
 
     <div className="form-group">
@@ -173,8 +175,8 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
     </div>
 
     <div className="form-group">
-      <label htmlFor="genero">Gênero*</label>
-      <select id="genero" name="genero" value={formData.genero} onChange={onSelectChange} required>
+      <label htmlFor="genero">Gênero{!isEditing ? '*' : ''}</label>
+      <select id="genero" name="genero" value={formData.genero} onChange={onSelectChange} required={!isEditing}>
         <option value="">Selecione</option>
         {GENEROS_OPTIONS.map(option => (
           <option key={option.value} value={option.value}>
@@ -210,13 +212,13 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
     </div>
 
     <div className="form-group">
-      <label htmlFor="cidade">Cidade*</label>
-      <input type="text" id="cidade" name="cidade" value={formData.cidade} onChange={onInputChange} required />
+      <label htmlFor="cidade">Cidade{!isEditing ? '*' : ''}</label>
+      <input type="text" id="cidade" name="cidade" value={formData.cidade} onChange={onInputChange} required={!isEditing} />
     </div>
 
     <div className="form-group">
-      <label htmlFor="regiao">Região*</label>
-      <select id="regiao" name="regiao" value={formData.regiao} onChange={onSelectChange} required>
+      <label htmlFor="regiao">Região{!isEditing ? '*' : ''}</label>
+      <select id="regiao" name="regiao" value={formData.regiao} onChange={onSelectChange} required={!isEditing}>
         <option value="">Selecione</option>
         {REGIOES_OPTIONS.map(option => (
           <option key={option.value} value={option.value}>
@@ -247,14 +249,14 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
           name="religiao_outra"
           value={formData.religiao_outra}
           onChange={onInputChange}
-          required
+          required={!isEditing}
         />
       </div>
     )}
 
     <div className="form-group">
-      <label htmlFor="profissao">Profissão*</label>
-      <select id="profissao" name="profissao" value={formData.profissao} onChange={onSelectChange} required>
+      <label htmlFor="profissao">Profissão{!isEditing ? '*' : ''}</label>
+      <select id="profissao" name="profissao" value={formData.profissao} onChange={onSelectChange} required={!isEditing}>
         <option value="">Selecione</option>
         {PROFISSOES_OPTIONS.map(option => (
           <option key={option.value} value={option.value}>
@@ -273,14 +275,14 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
           name="profissao_outra"
           value={formData.profissao_outra}
           onChange={onInputChange}
-          required
+          required={!isEditing}
         />
       </div>
     )}
 
     <div className="form-group">
-      <label htmlFor="segmento_social">Segmento social*</label>
-      <select id="segmento_social" name="segmento_social" value={formData.segmento_social} onChange={onSelectChange} required>
+      <label htmlFor="segmento_social">Segmento social{!isEditing ? '*' : ''}</label>
+      <select id="segmento_social" name="segmento_social" value={formData.segmento_social} onChange={onSelectChange} required={!isEditing}>
         <option value="">Selecione</option>
         {SEGMENTOS_SOCIAIS_OPTIONS.map(option => (
           <option key={option.value} value={option.value}>
@@ -299,7 +301,7 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
           name="segmento_social_outro"
           value={formData.segmento_social_outro}
           onChange={onInputChange}
-          required
+          required={!isEditing}
         />
       </div>
     )}
@@ -325,7 +327,7 @@ const EleitorFormGrid = ({ formData, onInputChange, onSelectChange, onCheckboxCh
           name="lideranca_outra"
           value={formData.lideranca_outra}
           onChange={onInputChange}
-          required
+          required={!isEditing}
         />
       </div>
     )}

@@ -179,10 +179,46 @@ const UserRow: FC<UserRowProps> = memo(({ user, onDeleted, onUpdated }) => {
           onClose={handleCloseEditModal}
           userToEdit={user as unknown as Eleitor}
           isEditing={true}
-          onSuccess={(updated?: Eleitor) => {
+          onSuccess={(updated) => {
+            console.log('UserRow onSuccess chamado com:', updated);
             handleCloseEditModal();
-            if (updated) {
-              onUpdated?.({ id: user.id, ...updated });
+            if (updated && onUpdated) {
+              // Converter EleitorFormSubmitResult para User
+              const updatedUser = {
+                id: updated.id,
+                nome: updated.nome,
+                email: updated.email || undefined,
+                cpf: updated.cpf || undefined,
+                regiao: updated.regiao as string,
+                cidade: updated.cidade,
+                genero: updated.genero as string,
+                bairro: updated.bairro || undefined,
+                telefone: updated.telefone || undefined,
+                instagram: updated.instagram || undefined,
+                facebook: updated.facebook || undefined,
+                tiktok: updated.tiktok || undefined,
+                religiao: updated.religiao as string || undefined,
+                religiao_outra: updated.religiao_outra || undefined,
+                observacoes: updated.observacoes || undefined,
+                profissao: updated.profissao as string || undefined,
+                profissao_outra: updated.profissao_outra || undefined,
+                segmento_social: updated.segmento_social as string || undefined,
+                segmento_social_outro: updated.segmento_social_outro || undefined,
+                lideranca: updated.lideranca as string || undefined,
+                lideranca_outra: updated.lideranca_outra || undefined,
+                atendido_instituto: updated.atendido_instituto,
+                atendido_demandas: updated.atendido_demandas,
+                participante_atividades: updated.participante_atividades,
+                data_instituto: updated.data_instituto || undefined,
+                data_demandas: updated.data_demandas || undefined,
+                data_atividades: updated.data_atividades || undefined,
+                escola: updated.escola || undefined,
+                interacao: updated.interacao,
+                created_at: user.created_at, // Manter o original
+                data_nascimento: updated.data_nascimento || ''
+              };
+              console.log('Chamando onUpdated com:', updatedUser);
+              onUpdated(updatedUser);
             }
           }}
         />
