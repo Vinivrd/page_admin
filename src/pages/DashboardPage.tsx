@@ -84,6 +84,12 @@ const DashboardPage = () => {
     });
   };
 
+  const handleEleitorCreated = () => {
+    setIsAddModalOpen(false);
+    // Dar refresh na página após criar usuário
+    window.location.reload();
+  };
+
   const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
@@ -392,6 +398,7 @@ const DashboardPage = () => {
       <AddUserModal 
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleEleitorCreated}
       />
     </div>
   );
