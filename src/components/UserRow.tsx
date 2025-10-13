@@ -15,6 +15,10 @@ export interface User {
   regiao: string;
   cidade: string;
   genero: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  cep?: string;
   bairro?: string;
   telefone?: string;
   instagram?: string;
@@ -192,6 +196,10 @@ const UserRow: FC<UserRowProps> = memo(({ user, onDeleted, onUpdated }) => {
                 regiao: updated.regiao as string,
                 cidade: updated.cidade,
                 genero: updated.genero as string,
+                rua: updated.rua || undefined,
+                numero: updated.numero || undefined,
+                complemento: updated.complemento || undefined,
+                cep: updated.cep || undefined,
                 bairro: updated.bairro || undefined,
                 telefone: updated.telefone || undefined,
                 instagram: updated.instagram || undefined,
