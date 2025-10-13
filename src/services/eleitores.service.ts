@@ -444,6 +444,9 @@ export interface FiltrosEleitor {
   atendido_instituto?: boolean;
   atendido_demandas?: boolean;
   participante_atividades?: boolean;
+  nome?: string;
+  email?: string;
+  cpf?: string;
 }
 
 /**
@@ -483,6 +486,21 @@ export async function searchEleitores(filters: FiltrosEleitor) {
 
   if (filters.lideranca) {
     query = query.eq('lideranca', filters.lideranca);
+  }
+
+  const nomeFilter = filters.nome?.trim();
+  if (nomeFilter) {
+    query = query.ilike('nome', `%${nomeFilter}%`);
+  }
+
+  const emailFilter = filters.email?.trim();
+  if (emailFilter) {
+    query = query.ilike('email', `%${emailFilter}%`);
+  }
+
+  const cpfFilter = filters.cpf?.trim();
+  if (cpfFilter) {
+    query = query.ilike('cpf', `%${cpfFilter}%`);
   }
 
   if (filters.interacao !== undefined) {
@@ -562,6 +580,12 @@ export async function fetchEleitoresKeyset(params: {
     if (filters.atendido_instituto !== undefined) query = query.eq('atendido_instituto', filters.atendido_instituto);
     if (filters.atendido_demandas !== undefined) query = query.eq('atendido_demandas', filters.atendido_demandas);
     if (filters.participante_atividades !== undefined) query = query.eq('participante_atividades', filters.participante_atividades);
+    const nomeFilter = filters.nome?.trim();
+    if (nomeFilter) query = query.ilike('nome', `%${nomeFilter}%`);
+    const emailFilter = filters.email?.trim();
+    if (emailFilter) query = query.ilike('email', `%${emailFilter}%`);
+    const cpfFilter = filters.cpf?.trim();
+    if (cpfFilter) query = query.ilike('cpf', `%${cpfFilter}%`);
     if (filters.search) {
       query = query.or(
         `nome.ilike.%${filters.search}%,email.ilike.%${filters.search}%,cpf.eq.${filters.search}`
@@ -635,6 +659,12 @@ export async function fetchEleitoresPage(params: {
     if (filters.atendido_instituto !== undefined) query = query.eq('atendido_instituto', filters.atendido_instituto);
     if (filters.atendido_demandas !== undefined) query = query.eq('atendido_demandas', filters.atendido_demandas);
     if (filters.participante_atividades !== undefined) query = query.eq('participante_atividades', filters.participante_atividades);
+    const nomeFilter = filters.nome?.trim();
+    if (nomeFilter) query = query.ilike('nome', `%${nomeFilter}%`);
+    const emailFilter = filters.email?.trim();
+    if (emailFilter) query = query.ilike('email', `%${emailFilter}%`);
+    const cpfFilter = filters.cpf?.trim();
+    if (cpfFilter) query = query.ilike('cpf', `%${cpfFilter}%`);
     if (filters.search) {
       query = query.or(
         `nome.ilike.%${filters.search}%,email.ilike.%${filters.search}%,cpf.eq.${filters.search}`

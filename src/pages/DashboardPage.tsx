@@ -14,7 +14,16 @@ import { REGIOES_OPTIONS, RELIGIOES_OPTIONS } from '../services/enums.utils';
 
 const DashboardPage = () => {
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
-  const [filters, setFilters] = useState({ regiao: '', interacao: '', genero: '', cidade: '', search: '', religiao: '' });
+  const [filters, setFilters] = useState({
+    regiao: '',
+    interacao: '',
+    genero: '',
+    cidade: '',
+    nome: '',
+    email: '',
+    cpf: '',
+    religiao: ''
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(50);
   const [totalCount, setTotalCount] = useState(0);
@@ -24,14 +33,22 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(false);
 
   // Helper: converter filtros da UI para filtros do serviço
-  const buildServiceFilters = () => ({
-    regiao: filters.regiao || undefined,
-    cidade: filters.cidade || undefined,
-    genero: filters.genero || undefined,
-    religiao: filters.religiao || undefined,
-    interacao: filters.interacao === '' ? undefined : filters.interacao === 'true',
-    search: filters.search || undefined,
-  });
+  const buildServiceFilters = () => {
+    const nome = filters.nome.trim();
+    const email = filters.email.trim();
+    const cpf = filters.cpf.trim();
+
+    return {
+      regiao: filters.regiao || undefined,
+      cidade: filters.cidade || undefined,
+      genero: filters.genero || undefined,
+      religiao: filters.religiao || undefined,
+      interacao: filters.interacao === '' ? undefined : filters.interacao === 'true',
+      nome: nome || undefined,
+      email: email || undefined,
+      cpf: cpf || undefined
+    };
+  };
 
   // Carregar ao montar e quando filtros mudarem
   useEffect(() => {
@@ -57,7 +74,16 @@ const DashboardPage = () => {
     };
     loadFirstPage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.regiao, filters.interacao, filters.genero, filters.cidade, filters.search, filters.religiao]);
+  }, [
+    filters.regiao,
+    filters.interacao,
+    filters.genero,
+    filters.cidade,
+    filters.nome,
+    filters.email,
+    filters.cpf,
+    filters.religiao
+  ]);
 
   // Estatísticas sobre os itens carregados (já filtrados pelo backend)
   const loadedStats = useMemo(() => ({
@@ -95,7 +121,16 @@ const DashboardPage = () => {
   };
 
   const clearFilters = () => {
-    setFilters({ regiao: '', interacao: '', genero: '', cidade: '', search: '', religiao: '' });
+    setFilters({
+      regiao: '',
+      interacao: '',
+      genero: '',
+      cidade: '',
+      nome: '',
+      email: '',
+      cpf: '',
+      religiao: ''
+    });
   };
 
   // const handleAddEleitorSuccess = () => {
@@ -169,10 +204,23 @@ const DashboardPage = () => {
             onChange={val => handleFilterChange('religiao', val)}
           />
           <SearchFilter
-            label="Buscar"
-            placeholder="Nome, email ou CPF"
-            value={filters.search}
-            onChange={val => handleFilterChange('search', val)}
+            label="Nome"
+            placeholder="Buscar por nome"
+            value={filters.nome}
+            onChange={val => handleFilterChange('nome', val)}
+          />
+          <SearchFilter
+            label="Email"
+            placeholder="Buscar por email"
+            value={filters.email}
+            onChange={val => handleFilterChange('email', val)}
+          />
+          <SearchFilter
+            label="CPF"
+            placeholder="Buscar por CPF"
+            value={filters.cpf}
+            onChange={val => handleFilterChange('cpf', val)}
+            inputMode="numeric"
           />
           <SearchFilter
             label="Cidade"

@@ -262,11 +262,97 @@ const ContactInfo: FC<{ telefone?: string; email?: string }> = ({ telefone, emai
   </div>
 );
 
+type SocialPlatform = 'instagram' | 'facebook' | 'tiktok';
+
+const extractSocialHandle = (value: string): string | null => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      const path = parsed.pathname.replace(/\/+$/, '');
+      if (!path) return null;
+      const segments = path.split('/').filter(Boolean);
+      if (segments.length === 0) return null;
+      const lastSegment = segments[segments.length - 1];
+      return lastSegment.replace(/^@/, '');
+    } catch {
+      return null;
+    }
+  }
+
+  return trimmed.replace(/^@/, '');
+};
+
+const buildSocialUrl = (platform: SocialPlatform, value: string): string | null => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  const handle = extractSocialHandle(trimmed);
+  if (!handle) return null;
+
+  switch (platform) {
+    case 'instagram':
+      return `https://www.instagram.com/${handle}`;
+    case 'facebook':
+      return `https://www.facebook.com/${handle}`;
+    case 'tiktok':
+      return `https://www.tiktok.com/@${handle}`;
+    default:
+      return null;
+  }
+};
+
+const buildSocialLabel = (platform: SocialPlatform, value: string): string | null => {
+  const handle = extractSocialHandle(value);
+  if (!handle) {
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+
+  if (platform === 'facebook') {
+    return handle;
+  }
+
+  return handle.startsWith('@') ? handle : `@${handle}`;
+};
+
 const SocialInfo: FC<{ instagram?: string; facebook?: string; tiktok?: string }> = ({ instagram, facebook, tiktok }) => (
   <div className="user-row__social">
-    {instagram && <span className="user-row__social-item">IG: {instagram}</span>}
-    {facebook && <span className="user-row__social-item">FB: {facebook}</span>}
-    {tiktok && <span className="user-row__social-item">TT: {tiktok}</span>}
+    {instagram && instagram.trim() && (
+      <a
+        className="user-row__social-item"
+        href={buildSocialUrl('instagram', instagram) ?? instagram}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        IG: {buildSocialLabel('instagram', instagram) ?? instagram.trim()}
+      </a>
+    )}
+    {facebook && facebook.trim() && (
+      <a
+        className="user-row__social-item"
+        href={buildSocialUrl('facebook', facebook) ?? facebook}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        FB: {buildSocialLabel('facebook', facebook) ?? facebook.trim()}
+      </a>
+    )}
+    {tiktok && tiktok.trim() && (
+      <a
+        className="user-row__social-item"
+        href={buildSocialUrl('tiktok', tiktok) ?? tiktok}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        TT: {buildSocialLabel('tiktok', tiktok) ?? tiktok.trim()}
+      </a>
+    )}
     {!instagram && !facebook && !tiktok && <span className="user-row__social-item">-</span>}
   </div>
 );

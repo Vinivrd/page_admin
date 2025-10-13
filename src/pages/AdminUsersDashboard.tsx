@@ -26,7 +26,9 @@ interface FiltersState {
   interacao: BooleanFilterValue;
   genero: string;
   cidade: string;
-  search: string;
+  nome: string;
+  email: string;
+  cpf: string;
   religiao: string;
   profissao: string;
   segmento_social: string;
@@ -42,7 +44,9 @@ const initialFilters: FiltersState = {
   interacao: '',
   genero: '',
   cidade: '',
-  search: '',
+  nome: '',
+  email: '',
+  cpf: '',
   religiao: '',
   profissao: '',
   segmento_social: '',
@@ -93,6 +97,10 @@ const AdminUsersDashboard = () => {
   };
 
   const filteredEleitores = useMemo(() => {
+    const nomeFilter = filters.nome.trim().toLowerCase();
+    const emailFilter = filters.email.trim().toLowerCase();
+    const normalizedCpfFilter = filters.cpf.replace(/\D/g, '');
+
     return eleitores.filter(e => {
       const matchesRegioes =
         filters.regioes.length === 0 || (e.regiao && filters.regioes.includes(e.regiao));
@@ -113,10 +121,11 @@ const AdminUsersDashboard = () => {
         || e.atendido_demandas === parseBooleanFilter(filters.atendido_demandas);
       const matchesParticipanteAtividades = parseBooleanFilter(filters.participante_atividades) === undefined
         || e.participante_atividades === parseBooleanFilter(filters.participante_atividades);
-      const matchesSearch = !filters.search ||
-        e.nome.toLowerCase().includes(filters.search.toLowerCase()) ||
-        (e.email?.toLowerCase().includes(filters.search.toLowerCase())) ||
-        (e.cpf?.includes(filters.search));
+      const matchesNome = !nomeFilter || e.nome.toLowerCase().includes(nomeFilter);
+      const matchesEmail = !emailFilter || (e.email?.toLowerCase().includes(emailFilter));
+      const matchesCpf =
+        !normalizedCpfFilter ||
+        (e.cpf && e.cpf.replace(/\D/g, '').includes(normalizedCpfFilter));
 
       return (
         matchesRegioes &&
@@ -131,7 +140,9 @@ const AdminUsersDashboard = () => {
         matchesAtendidoInstituto &&
         matchesAtendidoDemandas &&
         matchesParticipanteAtividades &&
-        matchesSearch
+        matchesNome &&
+        matchesEmail &&
+        matchesCpf
       );
     });
   }, [eleitores, filters]);
@@ -227,6 +238,18 @@ const AdminUsersDashboard = () => {
       badges.push({ label: 'Liderança', value: filters.lideranca });
     }
 
+    if (filters.nome.trim()) {
+      badges.push({ label: 'Nome', value: filters.nome });
+    }
+
+    if (filters.email.trim()) {
+      badges.push({ label: 'Email', value: filters.email });
+    }
+
+    if (filters.cpf.trim()) {
+      badges.push({ label: 'CPF', value: filters.cpf });
+    }
+
     const booleanFilters: Array<{ key: keyof FiltersState; label: string }> = [
       { key: 'interacao', label: 'Interação' },
       { key: 'atendido_instituto', label: 'Atendido Instituto' },
@@ -240,10 +263,6 @@ const AdminUsersDashboard = () => {
         badges.push({ label, value: value === 'true' ? 'Sim' : 'Não' });
       }
     });
-
-    if (filters.search.trim()) {
-      badges.push({ label: 'Busca', value: filters.search });
-    }
 
     return badges;
   }, [filters]);
@@ -436,10 +455,40 @@ const AdminUsersDashboard = () => {
             <small>Use Ctrl/Cmd para selecionar múltiplos bairros</small>
           </div>
           <div className="filter-group">
-            <label>Buscar</label>
+            <label>Nome</label>
             <div className="search-wrapper">
               <Search />
-              <input type="text" value={filters.search} onChange={e => handleFilterChange('search', e.target.value)} placeholder="Nome, email ou CPF" />
+              <input
+                type="text"
+                value={filters.nome}
+                onChange={e => handleFilterChange('nome', e.target.value)}
+                placeholder="Buscar por nome"
+              />
+            </div>
+          </div>
+          <div className="filter-group">
+            <label>Email</label>
+            <div className="search-wrapper">
+              <Search />
+              <input
+                type="text"
+                value={filters.email}
+                onChange={e => handleFilterChange('email', e.target.value)}
+                placeholder="Buscar por email"
+              />
+            </div>
+          </div>
+          <div className="filter-group">
+            <label>CPF</label>
+            <div className="search-wrapper">
+              <Search />
+              <input
+                type="text"
+                value={filters.cpf}
+                onChange={e => handleFilterChange('cpf', e.target.value)}
+                placeholder="Buscar por CPF"
+                inputMode="numeric"
+              />
             </div>
           </div>
         </div>
