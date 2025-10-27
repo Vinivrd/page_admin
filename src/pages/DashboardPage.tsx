@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Filter } from 'lucide-react';
+import { Filter, Copy } from 'lucide-react';
 import BooleanFilter from '../components/filtros/BooleanFilter';
 import ListFilter from '../components/filtros/ListFilter';
 import SearchFilter from '../components/filtros/SearchFilter';
@@ -10,7 +10,7 @@ import './DashboardPage.scss';
 import { fetchEleitoresPage } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
 import { REGIOES_OPTIONS, RELIGIOES_OPTIONS } from '../services/enums.utils';
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const DashboardPage = () => {
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
@@ -144,6 +144,36 @@ const DashboardPage = () => {
     });
   };
 
+  const handleExportNames = () => {
+    if (eleitores.length === 0) {
+      toast.warning('Nenhum eleitor para exportar', {
+        position: 'top-right',
+        autoClose: 3000
+      });
+      return;
+    }
+
+    const formatted = eleitores.map(eleitor => {
+      const nome = eleitor.nome || 'SEM NOME';
+      const telefone = eleitor.telefone ? eleitor.telefone.replace(/\D/g, '') : '-';
+      return `${nome.toUpperCase()} ${telefone}`;
+    }).join('\n');
+
+    navigator.clipboard.writeText(formatted)
+      .then(() => {
+        toast.success(`${eleitores.length} nomes copiados para a área de transferência!`, {
+          position: 'top-right',
+          autoClose: 3000
+        });
+      })
+      .catch(() => {
+        toast.error('Erro ao copiar. Tente novamente.', {
+          position: 'top-right',
+          autoClose: 3000
+        });
+      });
+  };
+
   // const handleAddEleitorSuccess = () => {
   //   // Recarregar os dados após adicionar um novo eleitor
   //   const getEleitores = async () => {
@@ -270,7 +300,15 @@ const DashboardPage = () => {
             >
               Limpar filtros
             </button>
-
+            <button 
+              type="button" 
+              className="btn-secondary btn-with-icon" 
+              onClick={handleExportNames}
+              aria-label="Exportar nomes e telefones"
+            >
+              <Copy size={16} />
+              Exportar Nomes
+            </button>
           </div>
         </div>
       </div>
