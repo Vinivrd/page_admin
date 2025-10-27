@@ -100,11 +100,22 @@ const DashboardPage = () => {
   const handleEleitorUpdated = (updatedUser: any) => {
     console.log('DashboardPage handleEleitorUpdated chamado com:', updatedUser);
     setEleitores(prev => {
-      const updated = prev.map(eleitor => 
-        eleitor.id === updatedUser.id 
-          ? { ...eleitor, ...(updatedUser as any), updated_at: new Date().toISOString() }
-          : eleitor
-      );
+      const updated = prev.map(eleitor => {
+        if (eleitor.id !== updatedUser.id) return eleitor;
+        
+        // Merge correto: só sobrescrever se o novo valor não for null/undefined
+        const merged: any = { ...eleitor };
+        Object.keys(updatedUser).forEach(key => {
+          const newValue = updatedUser[key];
+          // Sobrescrever apenas se o novo valor for definido (não null/undefined)
+          // Exceção: permitir sobrescrever com valores booleanos false
+          if (newValue !== null && newValue !== undefined) {
+            merged[key] = newValue;
+          }
+        });
+        merged.updated_at = new Date().toISOString();
+        return merged;
+      });
       console.log('Lista DashboardPage atualizada:', updated);
       return updated;
     });

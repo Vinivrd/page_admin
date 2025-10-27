@@ -519,6 +519,7 @@ export const useEleitorForm = ({ isOpen, isEditing, userToEdit, onSuccess }: Use
             return false
           }
 
+          console.log('Payload sendo enviado para updateEleitor:', payload)
           const result = await updateEleitor(userToEdit.id, payload)
           if (result.error) throw result.error
           persistedRecord = Array.isArray(result.data) && result.data.length > 0 ? (result.data[0] as Eleitor) : null
