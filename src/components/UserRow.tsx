@@ -260,12 +260,42 @@ const Location: FC<{ user: User }> = ({ user }) => (
   </div>
 );
 
-const ContactInfo: FC<{ telefone?: string; email?: string }> = ({ telefone, email }) => (
-  <div className="user-row__contact">
-    <div className="user-row__phone">{formatNullableField(telefone)}</div>
-    <div className="user-row__email-small">{formatNullableField(email)}</div>
-  </div>
-);
+const ContactInfo: FC<{ telefone?: string; email?: string }> = ({ telefone, email }) => {
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!telefone || !telefone.trim()) return;
+    
+    const cleanPhone = telefone.replace(/\D/g, '');
+    if (cleanPhone) {
+      const whatsappUrl = `https://wa.me/55${cleanPhone}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+
+  return (
+    <div className="user-row__contact">
+      {telefone && telefone.trim() ? (
+        <div 
+          className="user-row__phone user-row__phone--clickable" 
+          onClick={handlePhoneClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handlePhoneClick(e as any);
+            }
+          }}
+        >
+          {telefone}
+        </div>
+      ) : (
+        <div className="user-row__phone">{formatNullableField(telefone)}</div>
+      )}
+      <div className="user-row__email-small">{formatNullableField(email)}</div>
+    </div>
+  );
+};
 
 type SocialPlatform = 'instagram' | 'facebook' | 'tiktok';
 

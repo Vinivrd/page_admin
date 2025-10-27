@@ -114,6 +114,46 @@ export default function DetailPage() {
     )
   }
 
+  const renderPhoneField = (label: string, phone?: string) => {
+    const handlePhoneClick = () => {
+      if (!phone || !phone.trim() || phone === '-') return
+      
+      const cleanPhone = phone.replace(/\D/g, '')
+      if (cleanPhone) {
+        const whatsappUrl = `https://wa.me/55${cleanPhone}`
+        window.open(whatsappUrl, '_blank')
+      }
+    }
+
+    const hasPhone = phone && phone.trim() && phone !== '-'
+    
+    return (
+      <div className="detail-page__field">
+        <span className="detail-page__label">{label}</span>
+        <div className="detail-page__value">
+          {hasPhone ? (
+            <span 
+              className="detail-page__value--link" 
+              onClick={handlePhoneClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handlePhoneClick()
+                }
+              }}
+            >
+              {phone}
+            </span>
+          ) : (
+            <span className="detail-page__value--empty">-</span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="detail-page">
       <div className="detail-page__container">
@@ -131,7 +171,7 @@ export default function DetailPage() {
             <div className="detail-page__grid">
               {renderField('Nome', fmt(data.nome))}
               {renderField('E-mail', fmt(data.email))}
-              {renderField('Telefone', fmt(data.telefone))}
+              {renderPhoneField('Telefone', data.telefone)}
               {renderField('Data de Nascimento', formatDate(data.data_nascimento || undefined))}
               {renderField('CPF', fmt(data.cpf))}
               {renderField('Gênero', fmt(data.genero))}

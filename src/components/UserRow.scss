@@ -54,6 +54,22 @@
     
     div { margin-bottom: 0.25rem; }
   }
+
+  &__phone--clickable {
+    color: $blue-600;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $blue-700;
+      text-decoration: underline;
+    }
+
+    &:active {
+      color: $blue-700;
+    }
+  }
   
   &__gender,
   &__religion,
