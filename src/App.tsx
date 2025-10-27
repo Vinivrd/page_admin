@@ -3,6 +3,7 @@ import './styles/main.scss'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.tsx'
 import DashboardPage from './pages/DashboardPage.tsx'
+import DetailPage from './pages/DetailPage.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
       <ToastContainer

@@ -5,6 +5,7 @@ import './UserRow.scss';
 import AddUserModal from './add-user/AddUserModal';
 import { toast } from 'react-toastify';
 import { deleteEleitor, type Eleitor } from '../services/eleitores.service';
+import { useNavigate } from 'react-router-dom';
 
 // Movendo a interface User para um arquivo separado (simulado aqui)
 export interface User {
@@ -85,6 +86,10 @@ const formatEnumWithOther = (primary?: string, other?: string): string => {
 // Componente principal com memo para evitar renderizações desnecessárias
 const UserRow: FC<UserRowProps> = memo(({ user, onDeleted, onUpdated }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const goToDetail = () => {
+    if (user.id) navigate(`/detail/${user.id}`);
+  };
 
   const handleEditClick = () => {
     setIsEditModalOpen(true);
@@ -127,48 +132,48 @@ const UserRow: FC<UserRowProps> = memo(({ user, onDeleted, onUpdated }) => {
   return (
     <>
       <tr className="user-row">
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <UserInfo user={user} />
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <Location user={user} />
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <div className="user-row__gender">{formatNullableField(user.genero)}</div>
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <div className="user-row__religion">{formatEnumWithOther(user.religiao, user.religiao_outra)}</div>
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <ContactInfo telefone={user.telefone} email={user.email} />
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <SocialInfo instagram={user.instagram} facebook={user.facebook} tiktok={user.tiktok} />
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <Profession profissao={user.profissao} profissaoOutra={user.profissao_outra} escola={user.escola} />
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <div className="user-row__observacoes">{formatNullableField(user.observacoes)}</div>
         </td>
-        <td className="user-row__cell">
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>
           <span className={`user-row__interaction ${user.interacao ? 'user-row__interaction--yes' : 'user-row__interaction--no'}`}>
             {user.interacao ? 'Sim' : 'Não'}
           </span>
         </td>
-        <td className="user-row__cell">{formatDate(user.created_at)}</td>
+        <td className="user-row__cell" onClick={goToDetail} role="button" tabIndex={0}>{formatDate(user.created_at)}</td>
         <td className="user-row__cell">
           <div className="user-row__actions">
             <button 
               type="button" 
               className="user-row__action-button"
-              onClick={handleEditClick}
+              onClick={(e) => { e.stopPropagation(); handleEditClick(); }}
             >
               <span className="user-row__icon-wrapper">
                 <Edit size={16} />
               </span>
             </button>
-            <button type="button" className="user-row__action-button" onClick={handleDeleteClick} aria-label={`Excluir ${user.nome}`}>
+            <button type="button" className="user-row__action-button" onClick={(e) => { e.stopPropagation(); handleDeleteClick(); }} aria-label={`Excluir ${user.nome}`}>
               <span className="user-row__icon-wrapper">
                 <Trash2 size={16} />
               </span>
