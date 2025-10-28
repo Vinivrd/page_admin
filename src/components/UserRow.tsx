@@ -189,7 +189,9 @@ const UserRow: FC<UserRowProps> = memo(({ user, onDeleted, onUpdated }) => {
           userToEdit={user as unknown as Eleitor}
           isEditing={true}
           onSuccess={(updated) => {
-            console.log('UserRow onSuccess chamado com:', updated);
+            if (import.meta.env.DEV) {
+              console.log('UserRow onSuccess chamado com:', updated);
+            }
             handleCloseEditModal();
             if (updated && onUpdated) {
               // Converter EleitorFormSubmitResult para User
@@ -230,7 +232,9 @@ const UserRow: FC<UserRowProps> = memo(({ user, onDeleted, onUpdated }) => {
                 created_at: user.created_at, // Manter o original
                 data_nascimento: updated.data_nascimento || ''
               };
-              console.log('Chamando onUpdated com:', updatedUser);
+              if (import.meta.env.DEV) {
+                console.log('Chamando onUpdated com:', updatedUser);
+              }
               onUpdated(updatedUser);
             }
           }}

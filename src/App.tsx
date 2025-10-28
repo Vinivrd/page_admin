@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage.tsx'
 import DashboardPage from './pages/DashboardPage.tsx'
 import DetailPage from './pages/DetailPage.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
+import ProtectedRoute from './components/ProtectedRoute.tsx'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -13,8 +14,22 @@ function App() {
     <ErrorBoundary>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/detail/:id" element={<DetailPage />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/detail/:id" 
+          element={
+            <ProtectedRoute>
+              <DetailPage />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
       <ToastContainer

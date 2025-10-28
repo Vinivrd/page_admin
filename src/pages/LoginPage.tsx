@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import '../styles/login.scss';
-import { signIn, AuthError } from '../services/auth.service';
+import { signIn, AuthError, getSession } from '../services/auth.service';
 import { useNavigate } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
 
@@ -16,6 +16,24 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [authError, setAuthError] = useState<{message: string, details?: string} | null>(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  // Verificar se usuário já está autenticado ao carregar a página
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        const { data } = await getSession();
+        if (data?.session) {
+          // Se já está autenticado, redireciona para o dashboard
+          navigate('/dashboard', { replace: true });
+        }
+      } catch (error) {
+        // Se houver erro ao verificar sessão, apenas continua na página de login
+        console.error('Erro ao verificar sessão:', error);
+      }
+    };
+
+    checkExistingSession();
+  }, [navigate]);
 
   // Monitorar o tamanho da janela para ajustes responsivos
   useEffect(() => {

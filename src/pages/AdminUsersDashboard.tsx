@@ -274,14 +274,18 @@ const AdminUsersDashboard = () => {
   };
 
   const handleUserUpdated = (updatedUser: Partial<User> & { id: string }) => {
-    console.log('AdminUsersDashboard handleUserUpdated chamado com:', updatedUser);
+    if (import.meta.env.DEV) {
+      console.log('AdminUsersDashboard handleUserUpdated chamado com:', updatedUser);
+    }
     setEleitores(prev => {
       const updated = prev.map(eleitor => 
         eleitor.id === updatedUser.id 
           ? { ...eleitor, ...(updatedUser as any), updated_at: new Date().toISOString() } as Eleitor
           : eleitor
       );
-      console.log('Lista atualizada:', updated);
+      if (import.meta.env.DEV) {
+        console.log('Lista atualizada:', updated);
+      }
       return updated;
     });
   };

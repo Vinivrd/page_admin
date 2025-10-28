@@ -57,7 +57,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    color: $text-light;
+    color: $text-dark;
     
     .error-message-title {
       font-size: 0.95rem;
@@ -74,14 +74,14 @@
     .error-message-details {
       margin: 0;
       border-radius: 6px;
-      background: rgba($white, 0.05);
-      border: 1px dashed rgba($white, 0.1);
+      background: rgba($white, 0.7);
+      border: 1px dashed rgba($gray-300, 0.6);
       overflow: hidden;
       
       summary {
         padding: 0.5rem 0.75rem;
-        background: rgba($white, 0.04);
-        color: color.adjust($secondary-color, $lightness: 12%);
+        background: rgba($gray-100, 0.5);
+        color: $secondary-color;
         cursor: pointer;
         font-size: 0.85rem;
         font-weight: 600;
@@ -90,11 +90,11 @@
         gap: 0.35rem;
         
         &::marker {
-          color: color.adjust($secondary-color, $lightness: 12%);
+          color: $secondary-color;
         }
         
         &:hover {
-          background: rgba($secondary-color, 0.08);
+          background: rgba($blue-100, 0.6);
         }
       }
       
@@ -102,7 +102,7 @@
         margin: 0;
         padding: 0.65rem 0.75rem;
         font-size: 0.85rem;
-        color: rgba($white, 0.92);
+        color: $gray-800;
         line-height: 1.5;
       }
     }
@@ -115,15 +115,15 @@
     border-radius: 6px;
     margin-left: 0.5rem;
     cursor: pointer;
-    color: rgba($white, 0.65);
+    color: $gray-600;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     
     &:hover {
-      color: $white;
-      background: rgba($white, 0.08);
+      color: $gray-900;
+      background: rgba($gray-300, 0.4);
     }
   }
   

@@ -40,10 +40,12 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="error-container">
           <h2>Algo deu errado</h2>
           <p>Ocorreu um erro inesperado. Por favor, tente novamente ou entre em contato com o suporte.</p>
-          <details>
-            <summary>Detalhes do erro</summary>
-            <p>{this.state.error?.toString()}</p>
-          </details>
+          {import.meta.env.DEV && (
+            <details>
+              <summary>Detalhes do erro (apenas em desenvolvimento)</summary>
+              <p>{this.state.error?.toString()}</p>
+            </details>
+          )}
           <button 
             className="retry-button"
             onClick={() => this.setState({ hasError: false, error: null })}

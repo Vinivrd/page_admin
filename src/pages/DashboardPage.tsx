@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Filter, Copy } from 'lucide-react';
+import { Filter, Copy, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import BooleanFilter from '../components/filtros/BooleanFilter';
 import ListFilter from '../components/filtros/ListFilter';
 import SearchFilter from '../components/filtros/SearchFilter';
@@ -11,8 +12,10 @@ import { fetchEleitoresPage } from '../services/eleitores.service';
 import type { Eleitor } from '../services/eleitores.service';
 import { REGIOES_OPTIONS, RELIGIOES_OPTIONS } from '../services/enums.utils';
 import { toast } from 'react-toastify';
+import { signOut } from '../services/auth.service';
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [eleitores, setEleitores] = useState<Eleitor[]>([]);
   const [filters, setFilters] = useState({
     regiao: '',
@@ -98,7 +101,9 @@ const DashboardPage = () => {
   };
 
   const handleEleitorUpdated = (updatedUser: any) => {
-    console.log('DashboardPage handleEleitorUpdated chamado com:', updatedUser);
+    if (import.meta.env.DEV) {
+      console.log('DashboardPage handleEleitorUpdated chamado com:', updatedUser);
+    }
     setEleitores(prev => {
       const updated = prev.map(eleitor => {
         if (eleitor.id !== updatedUser.id) return eleitor;
@@ -116,7 +121,9 @@ const DashboardPage = () => {
         merged.updated_at = new Date().toISOString();
         return merged;
       });
-      console.log('Lista DashboardPage atualizada:', updated);
+      if (import.meta.env.DEV) {
+        console.log('Lista DashboardPage atualizada:', updated);
+      }
       return updated;
     });
   };
@@ -197,11 +204,33 @@ const DashboardPage = () => {
 
   // const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success('Logout realizado com sucesso!');
+      navigate('/login', { replace: true });
+    } catch (error) {
+      toast.error('Erro ao fazer logout');
+      console.error('Erro ao fazer logout:', error);
+    }
+  };
+
   return (
     <div className="dashboard">
       <div className="dashboard__header">
-        <h1>Dashboard de Eleitores</h1>
-        <p>Gerenciamento de eleitores</p>
+        <div>
+          <h1>Dashboard de Eleitores</h1>
+          <p>Gerenciamento de eleitores</p>
+        </div>
+        <button 
+          type="button" 
+          className="btn-logout" 
+          onClick={handleLogout}
+          aria-label="Sair do sistema"
+        >
+          <LogOut size={18} />
+          <span>Sair</span>
+        </button>
       </div>
 
       {error && <ErrorMessage message={error} details={errorDetails || undefined} />}
