@@ -154,6 +154,9 @@ export interface Eleitor {
   observacoes?: string;
   interacao: boolean;
   
+  // Soft delete
+  is_active?: number; // 1 = ativo, 0 = deletado
+  
   // Metadados
   created_at?: string;
   updated_at?: string;
@@ -236,13 +239,14 @@ function handleSupabaseError(error: any, defaultMessage: string): EleitoresError
 }
 
 /**
- * Busca todos os eleitores cadastrados
+ * Busca todos os eleitores cadastrados (apenas ativos)
  */
 export async function fetchEleitores() {
   try {
     const result = await supabase
       .from('eleitores')
       .select('*')
+      .eq('is_active', 1) // Apenas eleitores ativos
       .order('created_at', { ascending: false });
     
     if (result.error) {
@@ -269,7 +273,7 @@ export async function fetchEleitores() {
 }
 
 /**
- * Busca um eleitor específico pelo ID
+ * Busca um eleitor específico pelo ID (apenas se ativo)
  */
 export async function fetchEleitorById(id: string) {
   try {
@@ -281,11 +285,12 @@ export async function fetchEleitorById(id: string) {
       .from('eleitores')
       .select('*')
       .eq('id', id)
+      .eq('is_active', 1) // Apenas se ativo
       .single();
     
     if (result.error) {
       if (result.error.message?.includes('not found')) {
-        throw new EleitoresError(`Eleitor com ID ${id} não encontrado`, 'database/not-found');
+        throw new EleitoresError(`Eleitor com ID ${id} não encontrado ou foi removido`, 'database/not-found');
       }
       
       throw handleSupabaseError(
@@ -386,7 +391,7 @@ export async function updateEleitor(id: string, eleitor: Partial<EleitorUpsertPa
 }
 
 /**
- * Remove um eleitor
+ * Remove um eleitor (soft delete - marca como inativo)
  */
 export async function deleteEleitor(id: string) {
   try {
@@ -394,10 +399,12 @@ export async function deleteEleitor(id: string) {
       throw new EleitoresError('ID do eleitor não fornecido para exclusão', 'database/invalid-id');
     }
     
+    // Soft delete: atualiza is_active para 0 ao invés de deletar
     const result = await supabase
       .from('eleitores')
-      .delete()
-      .eq('id', id);
+      .update({ is_active: 0 })
+      .eq('id', id)
+      .eq('is_active', 1); // Apenas se ainda estiver ativo
     
     if (result.error) {
       if (result.error.message?.includes('not found')) {
@@ -450,10 +457,10 @@ export interface FiltrosEleitor {
 }
 
 /**
- * Busca eleitores com filtros expandidos
+ * Busca eleitores com filtros expandidos (apenas ativos)
  */
 export async function searchEleitores(filters: FiltrosEleitor) {
-  let query = supabase.from('eleitores').select('*');
+  let query = supabase.from('eleitores').select('*').eq('is_active', 1);
 
   // Aplicar filtros se fornecidos
   if (filters.regiao) {
@@ -550,7 +557,7 @@ export async function searchEleitores(filters: FiltrosEleitor) {
 } 
 
 /**
- * Busca eleitores com paginação por cursor (keyset)
+ * Busca eleitores com paginação por cursor (keyset) - apenas ativos
  */
 export async function fetchEleitoresKeyset(params: {
   limit?: number;
@@ -562,6 +569,7 @@ export async function fetchEleitoresKeyset(params: {
   let query = supabase
     .from('eleitores')
     .select('*')
+    .eq('is_active', 1) // Apenas ativos
     .order('created_at', { ascending: false })
     .order('id', { ascending: false })
     .limit(limit);
@@ -629,7 +637,7 @@ export async function fetchEleitoresKeyset(params: {
 }
 
 /**
- * Busca eleitores com paginação por página/tamanho (offset/range)
+ * Busca eleitores com paginação por página/tamanho (offset/range) - apenas ativos
  */
 export async function fetchEleitoresPage(params: {
   page?: number; // 1-based
@@ -643,6 +651,7 @@ export async function fetchEleitoresPage(params: {
   let query = supabase
     .from('eleitores')
     .select('*', { count: 'exact' })
+    .eq('is_active', 1) // Apenas ativos
     .order('created_at', { ascending: false })
     .range(from, to);
 
@@ -690,5 +699,115 @@ export async function fetchEleitoresPage(params: {
         'database/page-error'
       )
     } as const;
+  }
+}
+
+/**
+ * Restaura um eleitor deletado (soft delete - marca como ativo novamente)
+ */
+export async function restoreEleitor(id: string) {
+  try {
+    if (!id) {
+      throw new EleitoresError('ID do eleitor não fornecido para restauração', 'database/invalid-id');
+    }
+    
+    const result = await supabase
+      .from('eleitores')
+      .update({ is_active: 1 })
+      .eq('id', id)
+      .eq('is_active', 0); // Apenas se estiver deletado
+    
+    if (result.error) {
+      throw handleSupabaseError(
+        result.error,
+        `Erro ao restaurar eleitor com ID ${id}`
+      );
+    }
+    
+    return { data: result.data, error: null };
+  } catch (err) {
+    if (err instanceof EleitoresError) {
+      return { data: null, error: err };
+    }
+    
+    return {
+      data: null,
+      error: new EleitoresError(
+        err instanceof Error ? err.message : 'Erro desconhecido ao restaurar eleitor',
+        'database/restore-error'
+      )
+    };
+  }
+}
+
+/**
+ * Busca eleitores deletados (is_active = 0)
+ */
+export async function fetchDeletedEleitores() {
+  try {
+    const result = await supabase
+      .from('eleitores')
+      .select('*')
+      .eq('is_active', 0)
+      .order('updated_at', { ascending: false });
+    
+    if (result.error) {
+      throw handleSupabaseError(
+        result.error,
+        'Erro ao buscar eleitores deletados'
+      );
+    }
+    
+    return { data: result.data, error: null };
+  } catch (err) {
+    if (err instanceof EleitoresError) {
+      return { data: null, error: err };
+    }
+    
+    return {
+      data: null,
+      error: new EleitoresError(
+        err instanceof Error ? err.message : 'Erro desconhecido ao buscar eleitores deletados',
+        'database/fetch-deleted-error'
+      )
+    };
+  }
+}
+
+/**
+ * Deleta permanentemente um eleitor (hard delete - remove do banco)
+ * Use com cuidado! Esta ação é irreversível.
+ */
+export async function permanentDeleteEleitor(id: string) {
+  try {
+    if (!id) {
+      throw new EleitoresError('ID do eleitor não fornecido para exclusão permanente', 'database/invalid-id');
+    }
+    
+    const result = await supabase
+      .from('eleitores')
+      .delete()
+      .eq('id', id);
+    
+    if (result.error) {
+      throw handleSupabaseError(
+        result.error,
+        `Erro ao excluir permanentemente eleitor com ID ${id}`
+      );
+    }
+    
+    return { data: result.data, error: null };
+  } catch (err) {
+    if (err instanceof EleitoresError) {
+      return { data: null, error: err };
+    }
+    
+    return {
+      data: null,
+      error: new EleitoresError(
+        err instanceof Error ? err.message : 'Erro desconhecido ao excluir permanentemente eleitor',
+        'database/permanent-delete-error'
+      )
+    };
   }
 }
